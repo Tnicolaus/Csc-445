@@ -5,10 +5,9 @@ from fractions import Fraction
 
 def make_dictionary():        #should read from stdin and return a dictionary for the input LP
     dictionary = [                #a setup dictionary [constants, x1, x2, w1, w2, w3] *for a 2 opt var, 3 constraint problem
-        [0,1,1,0,0,0],
-        [2,1,-1,1,0,0],
-        [4,-1,0,0,1,0],
-        [4,0,-1,0,0,1]
+        [0,3,-3,-2,0,0],
+        [4,-2,2,1,1,0],
+        [-5,1,-1,3,0,1]
     ]
     return dictionary
 
@@ -37,7 +36,7 @@ def create_aux_problem(dictionary, basis):
         else:
             auxillary[row] = auxillary[row] + [1]
     basis = basis + [0]                            #<------add omega into basis vector as 0 since not in basis yet
-    
+
     #---Find least feasible constraint---------#
     min = 0
     least_feasible_row = -1                     #<------FIND LEAST FEASIBLE CONSTRAINT TO SWAP FOR OMEGA
@@ -49,27 +48,30 @@ def create_aux_problem(dictionary, basis):
     if least_feasible_row == -1:
         print("aux problem error")
         exit()
-
-    exit_var = -1
-    pivot_col = -1
+    
+    leaving_basis_var_col = -1                                  #<----pivot_col is the col of the leaving var
     for col, var in enumerate(basis):               #<----- UPDATE THE BASIS: sub in omega and out the old basis var
         if var == 1:                                #<----should always be one
             if auxillary[least_feasible_row][col] == 1:     #<------means this is the basis var in the equation as all other basis vars must be 0 (a basis var cannot be expressed in terms of other basis var)
                 basis[col] = 0
                 basis[-1] = 1
-                pivot_col = col
-   
+                leaving_basis_var_col = col
+                break
+    
     #---------------pivot in omega for least feasible constraint---------------#
     auxillary[least_feasible_row] = np.array(auxillary[least_feasible_row]) / -1        #<---- DO PIVOT IN PIVOT ROW (will work with fractions)
-    auxillary[least_feasible_row][pivot_col] = 1                                        #<---- set new basis variable to 1
+    auxillary[least_feasible_row][leaving_basis_var_col] = 1                                        #<---- set old basis_var to 1 snce math messed up and made it -1
+    auxillary[least_feasible_row][-1] = 1                                               #<---- set omega to 1 math made it -1 aswell
     
+    #-------------substitute into rest of constraints--------------------------#
+    # pivot_col is the entering var, will always be omega thus pivot_col = -1(last col)
+    #--------------------------------------------------------------------------#
     
     for eq_i, eq in enumerate(auxillary):
         if eq_i != least_feasible_row:
-            factor = np.array(auxillary[least_feasible_row]) * auxillary[eq_i][pivot_col]
+            factor = np.array(auxillary[least_feasible_row]) * auxillary[eq_i][-1]
             auxillary[eq_i] = np.array(auxillary[eq_i]) + factor                
-            auxillary[eq_i][pivot_col] = 0                                      #<------ set basic var to 0 in eqn that dont involve it
-    
+            auxillary[eq_i][-1] = 0                                      #<------ set basic var to 0 in eqn that dont involve it
     return auxillary, basis
 
 def not_optimal(dictionary):
@@ -196,7 +198,7 @@ def main():
     dictionary = make_dictionary()
     #--------TODO----------------
     #construct a list of which vectors are in the basis
-    basis = [0,0,0,1,1,1]      #for [const,x1,x2,w1,w2,w3] where w1,w2,w3 in basis
+    basis = [0,0,0,0,1,1]      #for [const,x1,x2,w1,w2,w3] where w1,w2,w3 in basis
 
     prev_obj_val = dictionary[0][0]
     #----------------------------
@@ -206,21 +208,28 @@ def main():
     #solve aux problem if not
     if not_feasible(dictionary):
         auxillary, basis = create_aux_problem(dictionary, basis)
-        pivot_col, pivot_row, unbounded = get_pivot(auxillary, basis, "Largest_coeff")
-        
+        print(auxillary)
+        #pivot_col, pivot_row, unbounded = get_pivot(auxillary, basis, "Largest_coeff")
+        #print(auxillary)
+        #print(basis)
+        #print(pivot_col)
+        #print(pivot_row)
+        #auxillary, basis = do_pivot(auxillary, basis, pivot_row, pivot_col)
+        #print(auxillary)
+        #print(basis)
         #auxillary = solve(auxillary, basis)
         #solution = get_solution(auxillary)
         #if optimal_obj_val != 0:
         #    infeasible
     #----------------------------
-    print(dictionary)
-    print(basis)
-    pivot_col, pivot_row, unbounded = get_pivot(dictionary, basis, "Largest_coeff")
-    print(pivot_col)
-    print(pivot_row)
-    dictionary, basis = do_pivot(dictionary, basis, pivot_col, pivot_row)
-    print(dictionary)
-    print(basis)
+    #print(dictionary)
+    #print(basis)
+    #pivot_col, pivot_row, unbounded = get_pivot(dictionary, basis, "Largest_coeff")
+    #print(pivot_col)
+    #print(pivot_row)
+    #dictionary, basis = do_pivot(dictionary, basis, pivot_col, pivot_row)
+    #print(dictionary)
+    #print(basis)
 
     print('hi')
 
