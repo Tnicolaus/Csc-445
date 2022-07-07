@@ -5,12 +5,10 @@ from fractions import Fraction
 
 def make_dictionary():        #should read from stdin and return a dictionary for the input LP
     dictionary = [                #a setup dictionary [constants, x1, x2, w1, w2, w3] *for a 2 opt var, 3 constraint problem
-        [0,2,1,0,0,0,0,0],      #starts out w1, w2, w3 in basis
-        [-3,1,1,1,0,0,0,0],
-        [-1,1,0,0,1,0,0,0],
-        [4,-1,0,0,0,1,0,0],
-        [-1,0,1,0,0,0,1,0],
-        [20,-3,-4,0,0,0,0,1]
+        [0,1,1,0,0,0],
+        [2,1,-1,1,0,0],
+        [4,-1,0,0,1,0],
+        [4,0,-1,0,0,1]
     ]
     return dictionary
 
@@ -68,8 +66,8 @@ def create_aux_problem(dictionary, basis):
     
     for eq_i, eq in enumerate(auxillary):
         if eq_i != least_feasible_row:
-            multiplier = np.array(auxillary[least_feasible_row]) * auxillary[eq_i][pivot_col]
-            auxillary[eq_i] = np.array(auxillary[eq_i]) + multiplier                
+            factor = np.array(auxillary[least_feasible_row]) * auxillary[eq_i][pivot_col]
+            auxillary[eq_i] = np.array(auxillary[eq_i]) + factor                
             auxillary[eq_i][pivot_col] = 0                                      #<------ set basic var to 0 in eqn that dont involve it
     
     return auxillary, basis
@@ -137,6 +135,33 @@ def get_pivot(dictionary, basis, method):
             
     return pivot_col, pivot_row, unbounded
 
+def do_pivot(dictionary, basis, pivot_col, pivot_row):
+    #--------pivot in entering val in our least feasible constraint---#
+    factor = dictionary[pivot_row][pivot_col]
+    for i in range(len(dictionary[pivot_row])):                 #<- find col of old basis variable to be swapped out
+        if basis[i] == 1 and dictionary[pivot_row][i] == 1:     #<- if we are the old basis var flip sign
+            dictionary[pivot_row][i] = dictionary[pivot_row][i] / factor
+            old_basis_col = i
+        elif i == pivot_col:                                    #<- if we are the entering var flip sign (the math messes this up)
+            dictionary[pivot_row][i] = dictionary[pivot_row][i] / factor
+        else:
+            dictionary[pivot_row][i] = dictionary[pivot_row][i] / -1*factor
+
+    #-------update rest of constraints--------------------------------#
+    for eq_i, eq in enumerate(dictionary):
+        if eq_i != pivot_row:
+            factor = np.array(dictionary[pivot_row]) * dictionary[eq_i][pivot_col]
+            dictionary[eq_i] = np.array(dictionary[eq_i]) + factor                
+            dictionary[eq_i][pivot_col] = 0 
+
+    #------update basis---------------------------------#
+    for i in range(len(basis)):
+        if i == pivot_col:
+            basis[i] = 1
+        elif i == old_basis_col:
+            basis[i] = 0
+
+    return(dictionary, basis)
 
 def solve(dictionary, basis):
     #-watchout for unboundedness
@@ -146,12 +171,16 @@ def solve(dictionary, basis):
     method = "Largest_coeff"
 
     while not_optimal(dictionary):
-        #prev_obj_val = dictionary[0][0]
-        #pivot_col, pivot_row, unbounded  = get_pivot(dictionary, basis, method)
+        prev_obj_val = dictionary[0][0]
+        pivot_col, pivot_row, unbounded  = get_pivot(dictionary, basis, method)
         #---------TODO-----------#
         # if unbounded is true need to deal with that probably end function here
+        if unbounded == True:
+            print("UNBOUNDED")
+            exit()
         #------------------------#
-        #dictionary = do_pivot(dictionary, basis, pivot_col, pivot_row)
+        dictionary = do_pivot(dictionary, basis, pivot_col, pivot_row)
+
         new_obj_val = dictionary[0][0]
         if new_obj_val == prev_obj_val:                                 #<---- if obj val remains constant -> degeneracy -> could be cycling, use blands to avoid
             method = "Blands"
@@ -167,7 +196,7 @@ def main():
     dictionary = make_dictionary()
     #--------TODO----------------
     #construct a list of which vectors are in the basis
-    basis = [0,0,0,1,1,1,1,1]      #for [const,x1,x2,w1,w2,w3] where w1,w2,w3 in basis
+    basis = [0,0,0,1,1,1]      #for [const,x1,x2,w1,w2,w3] where w1,w2,w3 in basis
 
     prev_obj_val = dictionary[0][0]
     #----------------------------
@@ -177,17 +206,21 @@ def main():
     #solve aux problem if not
     if not_feasible(dictionary):
         auxillary, basis = create_aux_problem(dictionary, basis)
-        print(auxillary)
-        print(basis)
         pivot_col, pivot_row, unbounded = get_pivot(auxillary, basis, "Largest_coeff")
-        print(pivot_col)
-        print(pivot_row)
-        print(unbounded)
+        
         #auxillary = solve(auxillary, basis)
         #solution = get_solution(auxillary)
         #if optimal_obj_val != 0:
         #    infeasible
     #----------------------------
+    print(dictionary)
+    print(basis)
+    pivot_col, pivot_row, unbounded = get_pivot(dictionary, basis, "Largest_coeff")
+    print(pivot_col)
+    print(pivot_row)
+    dictionary, basis = do_pivot(dictionary, basis, pivot_col, pivot_row)
+    print(dictionary)
+    print(basis)
 
     print('hi')
 
