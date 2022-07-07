@@ -106,12 +106,15 @@ def get_pivot(dictionary, basis, method):
         #-------get pivot_row -> leaving var--------#
         #scan through basis for lowest index vaiable
         #find eq for that variable and check if it has -coeff on entering pivot_col
+        done = 0
         for i in range(1, len(basis)):
-            if basis[i] == 1:
+            if basis[i] == 1 and done == 0:
                 for eq in range(1, len(dictionary)):                 #<--- skip obj function row in basis
                     if dictionary[eq][i] == 1:
                         if dictionary[eq][pivot_col] < 0:
                             pivot_row = eq
+                            done = 1
+                            break
 
     #--------check for unboundedness---------------#
     if pivot_row == NULL:
@@ -165,7 +168,7 @@ def main():
         #    infeasible
     #----------------------------
 
-    pivot_col, pivot_row, unbounded = get_pivot(dictionary, basis, "Largest_coeff")
+    pivot_col, pivot_row, unbounded = get_pivot(dictionary, basis, "Blands")
     print(dictionary)
     print(pivot_col)
     print(pivot_row)
