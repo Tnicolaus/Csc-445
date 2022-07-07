@@ -1,4 +1,3 @@
-from asyncio.windows_events import NULL
 import sys
 import copy
 import numpy as np
@@ -77,8 +76,8 @@ def get_pivot(dictionary, basis, method):
     max = -1
     pivot_col = -1
     unbounded = False
-    pivot_row = NULL
-    min_limiting_val = NULL
+    pivot_row = None
+    min_limiting_val = None
 
     if method == "Largest_coeff":
         for i, val in enumerate(dictionary[0]):
@@ -91,7 +90,7 @@ def get_pivot(dictionary, basis, method):
             eq = dictionary[i]
             if eq[pivot_col] < 0:
                 cur_limiting_val = abs(eq[0] / eq[pivot_col])                     #<--- check restriction imposed by entering var in this eqn
-                if min_limiting_val == NULL or cur_limiting_val < min_limiting_val:      #<- it is a bound and (no bound is set or its a min bound)
+                if min_limiting_val == None or cur_limiting_val < min_limiting_val:      #<- it is a bound and (no bound is set or its a min bound)
                     min_limiting_val = cur_limiting_val
                     pivot_row = i
 
@@ -117,7 +116,7 @@ def get_pivot(dictionary, basis, method):
                             break
 
     #--------check for unboundedness---------------#
-    if pivot_row == NULL:
+    if pivot_row == None:
         unbounded = True
             
     return pivot_col, pivot_row, unbounded
