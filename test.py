@@ -23,22 +23,14 @@ def main():
     
     tableau = to_tableau(c, A, b)
   
-        
-    auxillary = copy.deepcopy(tableau)           #<-----might be bad for performance
-    for row in range(len(auxillary)):
-        if row == 0:
-            for entry in range(len(auxillary[row])):               #<--- zero out first row
-                auxillary[row][entry] = 0
-            auxillary[row] = auxillary[row] + [-1]                #<--- add negative omega col
-        else:
-            auxillary[row] = auxillary[row] + [-1]
+    print(np.array(tableau[0]))
+    for i, val in enumerate(np.array(tableau[0])):
+        if i > 0 and val > 0:
+            break
+            #print("true")
 
-    print(auxillary)
-
-    l = [Fraction(1,5), Fraction(1,1), Fraction(3,4), Fraction(4,7)]
-    l = np.array(l) / -1
-
-    print(l)
+    for i in range(1,5):
+        print(i)
 
 if __name__ == "__main__":
     main()
