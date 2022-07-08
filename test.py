@@ -32,7 +32,7 @@ def main():
 
     a = np.array([1,2,3,4,0], dtype=object)
     b = np.array(a)
-    print(b)
+    #print(b)
     a[0] = 2
     #print(a)
     a = np.delete(a, [-1])
@@ -40,11 +40,18 @@ def main():
     l = Fraction(1,1)
     l = l/2
     print(l)
+    eq = np.array([
+        [Fraction(1), Fraction(2)],
+        [Fraction(3), Fraction(4)]
+    ])
 
     obj_eq = np.array([[1,2,3,4],
                     [5,6,7,8],
                     [9,10,11,12]]
                     )
+    print(eq[0][0])
+    eq[0][0] = Fraction(0)
+    print(eq)
 
     a = np.append(a,[1])
     #print(a)

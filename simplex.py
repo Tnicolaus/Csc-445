@@ -196,9 +196,7 @@ def do_pivot(dictionary, basis, pivot_col, pivot_row):
 
     dictionary[pivot_row] = np.divide(dictionary[pivot_row], rescaling_arr)
 
-    print(dictionary)
-    print("dictionary after swapping first row\n")
-    
+
     #-------update rest of constraints--------------------------------#
     for eq_i, eq in enumerate(dictionary):
         if eq_i != pivot_row:
@@ -212,8 +210,7 @@ def do_pivot(dictionary, basis, pivot_col, pivot_row):
             basis[i] = 1
         elif i == old_basis_col:
             basis[i] = 0
-    print(dictionary)
-    print(basis)
+    
     return(dictionary, basis)
 
 def get_obj_val(dictionary):
@@ -253,16 +250,18 @@ def reintroduce(dictionary, basis, obj_eq):
     #        - first turn entry of var to 0 in eqn then multiply as its not in new obj function
     #        - zero out var in obj function as its already been counted
     # - add together obj function and all of these vectors for new obj function
-    sum = np.array([0 for i in obj_eq])
+    sum = np.array([Fraction(0) for i in obj_eq])
 
     for col in range(len(obj_eq)):
         if basis[col] == 1:
+            print(col, "<- col")
             coeff_of_var = obj_eq[col]
-            obj_eq[col] = 0
+            obj_eq[col] = Fraction(0)                                                           #<- zero out subed in var in obj function
             for row in range(1,len(dictionary)):
+                print(row)
                 if dictionary[row][col] == 1:
                     eqn_for_var = dictionary[row]
-                    eqn_for_var[row][col] = 0
+                    eqn_for_var[col] = Fraction(0)       #<- zero out subed in var in constraint eqn
                     break
             sum = sum + (eqn_for_var * coeff_of_var)
 
@@ -285,27 +284,23 @@ def main():
         print(auxillary)
         print(basis)
 
-        pivot_col, pivot_row, unbounded = get_pivot(auxillary, basis, "Largest_coeff")
-        print(pivot_col)
-        print(pivot_row)
-        print("calln do_pivot")
-        print()
 
-        auxillary, basis = do_pivot(auxillary, basis, pivot_col, pivot_row)
-        #print(auxillary)
+        auxillary, basis = solve(auxillary, basis)
+        print(auxillary)
+        print(basis)
 
-        #auxillary, basis = solve(auxillary, basis)
         if get_obj_val(auxillary) != 0:
             print("Infeasible")
             exit()
 
         #-------Construct feasible dictionary or original LP------#
         else:
-            for i in range(len(auxillary)):
-                auxillary[i] = np.delete(auxillary[i],[-1])         #<- delete omega col
-            
+            auxillary = np.delete(auxillary, -1, 1)         #<- delete omega col
+            print()
+            print(auxillary)
+            print("before reintroduce\n")
             auxillary = reintroduce(auxillary, basis, original_obj_function)
-
+            print(auxillary)
     #----------------------------
     else:
         dictionary, basis = solve(dictionary, basis)
