@@ -206,7 +206,8 @@ def do_pivot(dictionary, basis, pivot_col, pivot_row):
             basis[i] = 1
         elif i == old_basis_col:
             basis[i] = 0
-    
+    print(dictionary)
+    print()
     return(dictionary, basis)
 
 def get_obj_val(dictionary):
@@ -275,7 +276,6 @@ def main():
     if not_feasible(dictionary):
         original_obj_function = copy.deepcopy(dictionary[0])
         auxillary, basis = create_aux_problem(dictionary, basis)
-        #print(auxillary)
         auxillary, basis = solve(auxillary, basis)
 
         if get_obj_val(auxillary) != 0:
