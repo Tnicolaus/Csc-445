@@ -15,32 +15,42 @@ def make_dictionary():        #should read from stdin and return a dictionary fo
     #]
 
 #-----example 5 simplex examples 2-----#
-# worked until optimal aux
-    dictionary = np.array([
-        [Fraction(0),Fraction(-2),Fraction(-1),Fraction(0),Fraction(0),Fraction(0)],
-        [Fraction(-1),Fraction(1),Fraction(-1),Fraction(1),Fraction(0),Fraction(0)],
-        [Fraction(-2),Fraction(1),Fraction(2),Fraction(0),Fraction(1),Fraction(0)],
-        [Fraction(1),Fraction(0),Fraction(-1),Fraction(0),Fraction(0),Fraction(1)]
-    ])
-    basis = [0,0,0,1,1,1]
+# worked until optimal 
+    #dictionary = np.array([
+    #    [Fraction(0),Fraction(-2),Fraction(-1),Fraction(0),Fraction(0),Fraction(0)],
+    #    [Fraction(-1),Fraction(1),Fraction(-1),Fraction(1),Fraction(0),Fraction(0)],
+    #    [Fraction(-2),Fraction(1),Fraction(2),Fraction(0),Fraction(1),Fraction(0)],
+    #    [Fraction(1),Fraction(0),Fraction(-1),Fraction(0),Fraction(0),Fraction(1)]
+    #])
+    #basis = [0,0,0,1,1,1]
 
 #-----example 1 simplex examples 2-----#
 # worked got unbounded
-    #dictionary = [
-    #    [0,1,0,0,0],
-    #    [1,-1,1,1,0],
-    #    [2,1,-1,0,1]
-    #]
+    #dictionary = np.array([
+    #    [Fraction(0),Fraction(1),Fraction(0),Fraction(0),Fraction(0)],
+    #    [Fraction(1),Fraction(-1),Fraction(1),Fraction(1),Fraction(0)],
+    #    [Fraction(2),Fraction(1),Fraction(-1),Fraction(0),Fraction(1)]
+    #])
     #basis = [0,0,0,1,1]
 
 #-----example 3 simplex examples 2-----#
 #worked got optimal dictionary
-    #dictionary = [
-    #    [0,1,2,3,0,0],
-    #    [3,-1,0,-1,1,0],
-    #    [2,0,-1,-2,0,1]
-    #]
+    #dictionary = np.array([
+    #    [Fraction(0),Fraction(1),Fraction(2),Fraction(3),Fraction(0),Fraction(0)],
+    #    [Fraction(3),Fraction(-1),Fraction(0),Fraction(-1),Fraction(1),Fraction(0)],
+    #    [Fraction(2),Fraction(0),Fraction(-1),Fraction(-2),Fraction(0),Fraction(1)]
+    #])
     #basis = [0,0,0,0,1,1]
+
+#----ex degenerate pivots(2) lecture 8--------#
+#Worked with blands got optimal dictionary
+    dictionary = np.array([
+        [Fraction(0), Fraction(1), Fraction(1), Fraction(1), Fraction(0), Fraction(0), Fraction(0)],
+        [Fraction(2), Fraction(-1), Fraction(-1), Fraction(0), Fraction(1), Fraction(0), Fraction(0)],
+        [Fraction(2), Fraction(-1), Fraction(0), Fraction(-1), Fraction(0), Fraction(1), Fraction(0)],
+        [Fraction(2), Fraction(0), Fraction(-1), Fraction(-1), Fraction(0), Fraction(0), Fraction(1)]
+    ])
+    basis = [0,0,0,0,1,1,1]
 
 
 
@@ -148,7 +158,7 @@ def get_pivot(dictionary, basis, method):
                     pivot_row = i
 
     elif method == "Blands":
-        #----choose smallest index var not in basis to enter and smallest index var in basis w negative coeff on the entering var to leave-----#
+        #----choose smallest index var not in basis to enter and var in basis w tightest bound to leave if tie choose lowest number-----#
         #-------get pivot_col -> entering var--------#
         for i in range(1, len(basis)):
             if basis[i] == 0 and dictionary[0][i] > 0:
@@ -157,15 +167,14 @@ def get_pivot(dictionary, basis, method):
 
         #-------get pivot_row -> leaving var-------------#
         #scan through basis for lowest index vaiable
-        #find eq for that variable and check if it has -coeff on entering pivot_col
-        done = 0
+        #find eq for that variable and check if it has tighter bound then current variable row and has negative entry for entering var
+        cur_ratio = -1
         for i in range(1, len(basis)):
-            if basis[i] == 1 and done == 0:
-                for eq in range(1, len(dictionary)):                 #<--- skip obj function row in basis
-                    if dictionary[eq][i] == 1:
-                        if dictionary[eq][pivot_col] < 0:
+            if basis[i] == 1:
+                for eq in range(1, len(dictionary)):                                                         #<--- skip obj function row in basis
+                    if dictionary[eq][i] == 1 and dictionary[eq][pivot_col] < 0:                             #<-correct row and row has neg coeff on entering var
+                        if abs(dictionary[eq][0] / dictionary[eq][pivot_col]) < cur_ratio or cur_ratio == -1 :  #<-tightest bound
                             pivot_row = eq
-                            done = 1
                             break
 
     #--------check for unboundedness------#
@@ -226,6 +235,9 @@ def solve(dictionary, basis):
     while not_optimal(dictionary):
         prev_obj_val = dictionary[0][0]
         pivot_col, pivot_row, unbounded  = get_pivot(dictionary, basis, method)
+
+        print(pivot_col)
+        print(pivot_row)
         #---------TODO-----------#
         # if unbounded is true need to deal with that probably end function here
         if unbounded == True:
@@ -233,6 +245,10 @@ def solve(dictionary, basis):
             exit()
         #------------------------#
         dictionary, basis = do_pivot(dictionary, basis, pivot_col, pivot_row)
+
+        print(method)
+        print(dictionary)
+        print()
 
         new_obj_val = dictionary[0][0]
         if new_obj_val == prev_obj_val:                                 #<---- if obj val remains constant -> degeneracy -> could be cycling, use blands to avoid
@@ -281,14 +297,9 @@ def main():
     if not_feasible(dictionary):
         original_obj_function = copy.deepcopy(dictionary[0])
         auxillary, basis = create_aux_problem(dictionary, basis)
-        print(auxillary)
-        print(basis)
-
 
         auxillary, basis = solve(auxillary, basis)
-        print(auxillary)
-        print(basis)
-
+        
         if get_obj_val(auxillary) != 0:
             print("Infeasible")
             exit()
@@ -299,7 +310,12 @@ def main():
             print()
             print(auxillary)
             print("before reintroduce\n")
+
             auxillary = reintroduce(auxillary, basis, original_obj_function)
+            print(auxillary)
+            print("after reintroduced\n")
+
+            auxillary, basis = solve(auxillary, basis)
             print(auxillary)
     #----------------------------
     else:
