@@ -29,8 +29,11 @@ def main():
             break
             #print("true")
 
-    for i in range(1,5):
+    a = np.array([1,2,3,4,0], dtype=object)
+    a[0] = 2
+    for i in a:
         print(i)
+    print(a)
 
 if __name__ == "__main__":
     main()

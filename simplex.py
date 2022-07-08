@@ -4,11 +4,22 @@ import numpy as np
 from fractions import Fraction
 
 def make_dictionary():        #should read from stdin and return a dictionary for the input LP
-    dictionary = [                #a setup dictionary [constants, x1, x2, w1, w2, w3] *for a 2 opt var, 3 constraint problem
+#----------------------------------#
+# should read from stdin and return a dictionary for the input LP
+# Will have Fractions as entries
+#----------------------------------#
+    #dictionary = [                #a setup dictionary [constants, x1, x2, w1, w2, w3] *for a 2 opt var, 3 constraint problem
+    #    [Fraction(0),Fraction(3),Fraction(-3),Fraction(-2),Fraction(0),Fraction(0)],
+    #    [Fraction(4),Fraction(-2),Fraction(2),Fraction(1),Fraction(1),Fraction(0)],
+    #    [Fraction(-5),Fraction(1),Fraction(-1),Fraction(3),Fraction(0),Fraction(1)]
+    #]
+
+    dictionary = [
         [0,3,-3,-2,0,0],
         [4,-2,2,1,1,0],
         [-5,1,-1,3,0,1]
     ]
+
     return dictionary
 
 def not_feasible(dictionary):
@@ -72,6 +83,7 @@ def create_aux_problem(dictionary, basis):
             factor = np.array(auxillary[least_feasible_row]) * auxillary[eq_i][-1]
             auxillary[eq_i] = np.array(auxillary[eq_i]) + factor                
             auxillary[eq_i][-1] = 0                                      #<------ set basic var to 0 in eqn that dont involve it
+
     return auxillary, basis
 
 def not_optimal(dictionary):
@@ -138,17 +150,28 @@ def get_pivot(dictionary, basis, method):
     return pivot_col, pivot_row, unbounded
 
 def do_pivot(dictionary, basis, pivot_col, pivot_row):
-    #--------pivot in entering val in our least feasible constraint---#
+    #------------------------------------------------#
+    # Will make this work with only numpy arrays, aux problems are already arrays
+    #initially feasible probs will have ot be converte to numpy arrays befor calling do_pivot
+    #------------------------------------------------#
+
+    #--------pivot in entering val in our tightest constraint---#
     factor = dictionary[pivot_row][pivot_col]
-    for i in range(len(dictionary[pivot_row])):                 #<- find col of old basis variable to be swapped out
+    rescaling_arr = [None] * len(dictionary[pivot_row])                                          #<- for dividing the numpy array at pivot row by the correct factors
+    rescaling_arr = np.array(rescaling_arr)
+
+    for i in range(len(dictionary[pivot_row])):                 #<- create rescaling_arr with the appropriate factors based on entering var having negative coefficient
         if basis[i] == 1 and dictionary[pivot_row][i] == 1:     #<- if we are the old basis var flip sign
-            dictionary[pivot_row][i] = dictionary[pivot_row][i] / factor
+            rescaling_arr[i] = factor
             old_basis_col = i
         elif i == pivot_col:                                    #<- if we are the entering var flip sign (the math messes this up)
-            dictionary[pivot_row][i] = dictionary[pivot_row][i] / factor
+            rescaling_arr[i] = factor
         else:
-            dictionary[pivot_row][i] = dictionary[pivot_row][i] / -1*factor
+            rescaling_arr[i] = -1*factor
 
+    dictionary[pivot_row] = np.divide(dictionary[pivot_row], rescaling_arr)
+    print(dictionary)
+    
     #-------update rest of constraints--------------------------------#
     for eq_i, eq in enumerate(dictionary):
         if eq_i != pivot_row:
@@ -208,15 +231,10 @@ def main():
     #solve aux problem if not
     if not_feasible(dictionary):
         auxillary, basis = create_aux_problem(dictionary, basis)
-        print(auxillary)
-        #pivot_col, pivot_row, unbounded = get_pivot(auxillary, basis, "Largest_coeff")
-        #print(auxillary)
-        #print(basis)
-        #print(pivot_col)
-        #print(pivot_row)
-        #auxillary, basis = do_pivot(auxillary, basis, pivot_row, pivot_col)
-        #print(auxillary)
-        #print(basis)
+        
+        pivot_col, pivot_row, unbounded = get_pivot(auxillary, basis, "Largest_coeff")
+        auxillary, basis = do_pivot(auxillary, basis, pivot_col, pivot_row)
+        
         #auxillary = solve(auxillary, basis)
         #solution = get_solution(auxillary)
         #if optimal_obj_val != 0:
