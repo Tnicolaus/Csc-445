@@ -31,9 +31,12 @@ def main():
 
     a = np.array([1,2,3,4,0], dtype=object)
     a[0] = 2
-    for i in a:
-        print(i)
     print(a)
+    a = np.delete(a, [-1])
+
+    obj_eq = np.array([1,2,3,4])
+    sum = [None for i in obj_eq]
+    print(sum)
 
 if __name__ == "__main__":
     main()

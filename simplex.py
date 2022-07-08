@@ -14,14 +14,35 @@ def make_dictionary():        #should read from stdin and return a dictionary fo
     #    [Fraction(-5),Fraction(1),Fraction(-1),Fraction(3),Fraction(0),Fraction(1)]
     #]
 
+#-----example 5 simplex examples 2-----#
+# worked until optimal aux
     dictionary = [
         [0,-2,-1,0,0,0],
         [-1,1,-1,1,0,0],
         [-2,1,2,0,1,0],
         [1,0,-1,0,0,1]
     ]
-
     basis = [0,0,0,1,1,1]
+
+#-----example 1 simplex examples 2-----#
+# worked got unbounded
+    #dictionary = [
+    #    [0,1,0,0,0],
+    #    [1,-1,1,1,0],
+    #    [2,1,-1,0,1]
+    #]
+    #basis = [0,0,0,1,1]
+
+#-----example 3 simplex examples 2-----#
+#worked got optimal dictionary
+    #dictionary = [
+    #    [0,1,2,3,0,0],
+    #    [3,-1,0,-1,1,0],
+    #    [2,0,-1,-2,0,1]
+    #]
+    #basis = [0,0,0,0,1,1]
+
+
 
     return dictionary, basis
 
@@ -41,7 +62,8 @@ def create_aux_problem(dictionary, basis):
     #------------------------------------#
 
     #--create dictionary with omega------#
-    auxillary = copy.deepcopy(dictionary)           #<-----might be bad for performance
+    #auxillary = copy.deepcopy(dictionary)           #<-----might be bad for performance
+    auxillary = dictionary
     for row in range(len(auxillary)):
         if row == 0:
             for entry in range(len(auxillary[row])):               #<--- zero out first row
@@ -190,6 +212,9 @@ def do_pivot(dictionary, basis, pivot_col, pivot_row):
     
     return(dictionary, basis)
 
+def get_obj_val(dictionary):
+    return dictionary[0][0]
+
 def solve(dictionary, basis):
     #-watchout for unboundedness
     #-watch for cycling 
@@ -206,7 +231,7 @@ def solve(dictionary, basis):
             print("UNBOUNDED")
             exit()
         #------------------------#
-        dictionary = do_pivot(dictionary, basis, pivot_col, pivot_row)
+        dictionary, basis = do_pivot(dictionary, basis, pivot_col, pivot_row)
 
         new_obj_val = dictionary[0][0]
         if new_obj_val == prev_obj_val:                                 #<---- if obj val remains constant -> degeneracy -> could be cycling, use blands to avoid
@@ -216,6 +241,31 @@ def solve(dictionary, basis):
 
     return dictionary, basis
 
+def reintroduce(dictionary, basis, obj_eq):
+    #------plan-------#
+    # -Obj_eq is an array
+    # -iterate over obj_function
+    # - if var in basis, create new array with coeff of var(factor) * row for var(eqn)
+    #        - first turn entry of var to 0 in eqn then multiply as its not in new obj function
+    #        - zero out var in obj function as its already been counted
+    # - add together obj function and all of these vectors for new obj function
+    sum = np.array([0 for i in obj_eq])
+
+    for col in range(len(obj_eq)):
+        if basis[col] == 1:
+            coeff_of_var = obj_eq[col]
+            obj_eq[col] = 0
+            for row in range(1,len(dictionary)):
+                if dictionary[row][col] == 1:
+                    eqn_for_var = dictionary[row]
+                    eqn_for_var[row][col] = 0
+                    break
+            sum = sum + (eqn_for_var * coeff_of_var)
+
+    new_obj_eq = sum + obj_eq
+    dictionary[0] = new_obj_eq
+
+    return dictionary
 
 def main():
     # -------TODO----------------
@@ -226,16 +276,30 @@ def main():
     #Check if initital dictionary feasible
     #solve aux problem if not
     if not_feasible(dictionary):
+        original_obj_function = copy.deepcopy(dictionary[0])
         auxillary, basis = create_aux_problem(dictionary, basis)
         auxillary, basis = solve(auxillary, basis)
-        #pivot_col, pivot_row, unbounded = get_pivot(auxillary, basis, "Largest_coeff")
-        #auxillary, basis = do_pivot(auxillary, basis, pivot_col, pivot_row)
-        
-        #auxillary = solve(auxillary, basis)
-        #solution = get_solution(auxillary)
-        #if optimal_obj_val != 0:
-        #    infeasible
+        print(auxillary)
+        print(basis)
+
+        if get_obj_val(auxillary) != 0:
+            print("Infeasible")
+            exit()
+
+        #-------Construct feasible dictionary or original LP------#
+        else:
+            for i in range(len(auxillary)):
+                auxillary[i] = np.delete(auxillary[i],[-1])         #<- delete omega col
+            
+            auxillary = reintroduce(auxillary, basis, original_obj_function)
+        print(auxillary)
+
     #----------------------------
+    else:
+        dictionary, basis = solve(dictionary, basis)
+        print(dictionary)
+        print(basis)
+
     #print(dictionary)
     #print(basis)
     #pivot_col, pivot_row, unbounded = get_pivot(dictionary, basis, "Largest_coeff")
