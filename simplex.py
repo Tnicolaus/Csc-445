@@ -253,15 +253,15 @@ def reintroduce(dictionary, basis, obj_eq):
     sum = np.array([Fraction(0) for i in obj_eq])
 
     for col in range(len(obj_eq)):
-        if basis[col] == 1:
+        if basis[col] == 1 and obj_eq[col] != 0:                     #<- If var in basis and in obj function
             print(col, "<- col")
             coeff_of_var = obj_eq[col]
-            obj_eq[col] = Fraction(0)                                                           #<- zero out subed in var in obj function
+            obj_eq[col] = Fraction(0)                                #<- zero out subed in var in obj function
             for row in range(1,len(dictionary)):
                 print(row)
                 if dictionary[row][col] == 1:
-                    eqn_for_var = dictionary[row]
-                    eqn_for_var[col] = Fraction(0)       #<- zero out subed in var in constraint eqn
+                    eqn_for_var = copy.deepcopy(dictionary[row])
+                    eqn_for_var[col] = Fraction(0)                   #<- zero out subed in var in constraint eqn
                     break
             sum = sum + (eqn_for_var * coeff_of_var)
 

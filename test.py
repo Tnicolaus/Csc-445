@@ -49,9 +49,10 @@ def main():
                     [5,6,7,8],
                     [9,10,11,12]]
                     )
-    print(eq[0][0])
+    print(Fraction(0) == 0)
+
     eq[0][0] = Fraction(0)
-    print(eq)
+    #print(eq)
 
     a = np.append(a,[1])
     #print(a)
