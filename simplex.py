@@ -15,12 +15,15 @@ def make_dictionary():        #should read from stdin and return a dictionary fo
     #]
 
     dictionary = [
-        [0,3,-3,-2,0,0],
-        [4,-2,2,1,1,0],
-        [-5,1,-1,3,0,1]
+        [0,-2,-1,0,0,0],
+        [-1,1,-1,1,0,0],
+        [-2,1,2,0,1,0],
+        [1,0,-1,0,0,1]
     ]
 
-    return dictionary
+    basis = [0,0,0,1,1,1]
+
+    return dictionary, basis
 
 def not_feasible(dictionary):
     for i in range(1, len(dictionary)):
@@ -190,7 +193,7 @@ def do_pivot(dictionary, basis, pivot_col, pivot_row):
 def solve(dictionary, basis):
     #-watchout for unboundedness
     #-watch for cycling 
-    #-watch aux problem is a list of "numpy arrays" might cause problems
+    #-All dictionaries are a list of "numpy arrays" 
 
     method = "Largest_coeff"
 
@@ -217,22 +220,16 @@ def solve(dictionary, basis):
 def main():
     # -------TODO----------------
     # make our initial dictionary
-    dictionary = make_dictionary()
-    #--------TODO----------------
-    #construct a list of which vectors are in the basis
-    basis = [0,0,0,0,1,1]      #for [const,x1,x2,w1,w2,w3] where w1,w2,w3 in basis
-
-    prev_obj_val = dictionary[0][0]
-    #----------------------------
+    dictionary, basis = make_dictionary()
 
     #----------------------------
     #Check if initital dictionary feasible
     #solve aux problem if not
     if not_feasible(dictionary):
         auxillary, basis = create_aux_problem(dictionary, basis)
-        
-        pivot_col, pivot_row, unbounded = get_pivot(auxillary, basis, "Largest_coeff")
-        auxillary, basis = do_pivot(auxillary, basis, pivot_col, pivot_row)
+        auxillary, basis = solve(auxillary, basis)
+        #pivot_col, pivot_row, unbounded = get_pivot(auxillary, basis, "Largest_coeff")
+        #auxillary, basis = do_pivot(auxillary, basis, pivot_col, pivot_row)
         
         #auxillary = solve(auxillary, basis)
         #solution = get_solution(auxillary)
