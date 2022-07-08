@@ -17,10 +17,10 @@ def make_dictionary():        #should read from stdin and return a dictionary fo
 #-----example 5 simplex examples 2-----#
 # worked until optimal aux
     dictionary = np.array([
-        [0,-2,-1,0,0,0],
-        [-1,1,-1,1,0,0],
-        [-2,1,2,0,1,0],
-        [1,0,-1,0,0,1]
+        [Fraction(0),Fraction(-2),Fraction(-1),Fraction(0),Fraction(0),Fraction(0)],
+        [Fraction(-1),Fraction(1),Fraction(-1),Fraction(1),Fraction(0),Fraction(0)],
+        [Fraction(-2),Fraction(1),Fraction(2),Fraction(0),Fraction(1),Fraction(0)],
+        [Fraction(1),Fraction(0),Fraction(-1),Fraction(0),Fraction(0),Fraction(1)]
     ])
     basis = [0,0,0,1,1,1]
 
@@ -63,9 +63,9 @@ def create_aux_problem(dictionary, basis):
 
     #--create dictionary with omega------#
     auxillary = dictionary
-    auxillary[0] = np.array([0 for i in auxillary[0]])
-    new_col = [[1] for i in range(len(auxillary))]
-    new_col[0] = [-1]
+    auxillary[0] = np.array([Fraction(0) for i in auxillary[0]])
+    new_col = [[Fraction(1)] for i in range(len(auxillary))]
+    new_col[0] = [Fraction(-1)]
     auxillary = np.append(auxillary, new_col, axis=1)
     
     basis = basis + [0]                            #<------add omega into basis vector as 0 since not in basis yet
@@ -92,9 +92,11 @@ def create_aux_problem(dictionary, basis):
                 break
     
     #---------------pivot in omega for least feasible constraint---------------#
-    auxillary[least_feasible_row] = np.array(auxillary[least_feasible_row]) / -1        #<---- DO PIVOT IN PIVOT ROW (will work with fractions)
-    auxillary[least_feasible_row][leaving_basis_var_col] = 1                                        #<---- set old basis_var to 1 snce math messed up and made it -1
-    auxillary[least_feasible_row][-1] = 1                                               #<---- set omega to 1 math made it -1 aswell
+    #auxillary[least_feasible_row] = np.array(auxillary[least_feasible_row]) / -1        #<---- DO PIVOT IN PIVOT ROW (will work with fractions)
+    auxillary[least_feasible_row] = auxillary[least_feasible_row] / -1        #<---- DO PIVOT IN PIVOT ROW (will work with fractions)
+
+    auxillary[least_feasible_row][leaving_basis_var_col] = Fraction(1)                                        #<---- set old basis_var to 1 snce math messed up and made it -1
+    auxillary[least_feasible_row][-1] = Fraction(1)                                               #<---- set omega to 1 math made it -1 aswell
     
     #-------------substitute into rest of constraints--------------------------#
     # pivot_col is the entering var, will always be omega thus pivot_col = -1(last col)
@@ -102,9 +104,10 @@ def create_aux_problem(dictionary, basis):
     
     for eq_i, eq in enumerate(auxillary):
         if eq_i != least_feasible_row:
-            factor = np.array(auxillary[least_feasible_row]) * auxillary[eq_i][-1]
-            auxillary[eq_i] = np.array(auxillary[eq_i]) + factor                
-            auxillary[eq_i][-1] = 0                                      #<------ set basic var to 0 in eqn that dont involve it
+            factor = auxillary[least_feasible_row] * auxillary[eq_i][-1]
+            auxillary[eq_i] = auxillary[eq_i] + factor                
+
+            auxillary[eq_i][-1] = Fraction(0)                                      #<------ set basic var to 0 in eqn that dont involve it
 
     return auxillary, basis
 
@@ -192,13 +195,16 @@ def do_pivot(dictionary, basis, pivot_col, pivot_row):
             rescaling_arr[i] = -1*factor
 
     dictionary[pivot_row] = np.divide(dictionary[pivot_row], rescaling_arr)
+
+    print(dictionary)
+    print("dictionary after swapping first row\n")
     
     #-------update rest of constraints--------------------------------#
     for eq_i, eq in enumerate(dictionary):
         if eq_i != pivot_row:
             factor = dictionary[pivot_row] * dictionary[eq_i][pivot_col]
             dictionary[eq_i] = np.array(dictionary[eq_i]) + factor                
-            dictionary[eq_i][pivot_col] = 0 
+            dictionary[eq_i][pivot_col] = Fraction(0) 
 
     #------update basis---------------------------------#
     for i in range(len(basis)):
@@ -207,7 +213,7 @@ def do_pivot(dictionary, basis, pivot_col, pivot_row):
         elif i == old_basis_col:
             basis[i] = 0
     print(dictionary)
-    print()
+    print(basis)
     return(dictionary, basis)
 
 def get_obj_val(dictionary):
@@ -276,8 +282,19 @@ def main():
     if not_feasible(dictionary):
         original_obj_function = copy.deepcopy(dictionary[0])
         auxillary, basis = create_aux_problem(dictionary, basis)
-        auxillary, basis = solve(auxillary, basis)
+        print(auxillary)
+        print(basis)
 
+        pivot_col, pivot_row, unbounded = get_pivot(auxillary, basis, "Largest_coeff")
+        print(pivot_col)
+        print(pivot_row)
+        print("calln do_pivot")
+        print()
+
+        auxillary, basis = do_pivot(auxillary, basis, pivot_col, pivot_row)
+        #print(auxillary)
+
+        #auxillary, basis = solve(auxillary, basis)
         if get_obj_val(auxillary) != 0:
             print("Infeasible")
             exit()

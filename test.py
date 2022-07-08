@@ -31,9 +31,15 @@ def main():
             #print("true")
 
     a = np.array([1,2,3,4,0], dtype=object)
+    b = np.array(a)
+    print(b)
     a[0] = 2
     #print(a)
     a = np.delete(a, [-1])
+
+    l = Fraction(1,1)
+    l = l/2
+    print(l)
 
     obj_eq = np.array([[1,2,3,4],
                     [5,6,7,8],
@@ -41,14 +47,8 @@ def main():
                     )
 
     a = np.append(a,[1])
-    print(a)
+    #print(a)
 
-    #for i in range(len(obj_eq)):
-        # j in range(len(obj_eq[i])):
-           # print(obj_eq[i][j])
-
-    sum = [None for i in obj_eq]
-    #print(sum)
 
 if __name__ == "__main__":
     main()
