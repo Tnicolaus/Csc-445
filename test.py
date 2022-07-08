@@ -1,5 +1,6 @@
 import sys
 import copy
+from tkinter.ttk import Separator
 import numpy as np
 from fractions import Fraction
 
@@ -31,12 +32,23 @@ def main():
 
     a = np.array([1,2,3,4,0], dtype=object)
     a[0] = 2
-    print(a)
+    #print(a)
     a = np.delete(a, [-1])
 
-    obj_eq = np.array([1,2,3,4])
+    obj_eq = np.array([[1,2,3,4],
+                    [5,6,7,8],
+                    [9,10,11,12]]
+                    )
+
+    a = np.append(a,[1])
+    print(a)
+
+    #for i in range(len(obj_eq)):
+        # j in range(len(obj_eq[i])):
+           # print(obj_eq[i][j])
+
     sum = [None for i in obj_eq]
-    print(sum)
+    #print(sum)
 
 if __name__ == "__main__":
     main()

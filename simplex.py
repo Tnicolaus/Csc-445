@@ -16,12 +16,12 @@ def make_dictionary():        #should read from stdin and return a dictionary fo
 
 #-----example 5 simplex examples 2-----#
 # worked until optimal aux
-    dictionary = [
+    dictionary = np.array([
         [0,-2,-1,0,0,0],
         [-1,1,-1,1,0,0],
         [-2,1,2,0,1,0],
         [1,0,-1,0,0,1]
-    ]
+    ])
     basis = [0,0,0,1,1,1]
 
 #-----example 1 simplex examples 2-----#
@@ -48,7 +48,7 @@ def make_dictionary():        #should read from stdin and return a dictionary fo
 
 def not_feasible(dictionary):
     for i in range(1, len(dictionary)):
-        if dictionary[i][0] < 0:
+        if dictionary[i, 0] < 0:
             return True
 
     return False
@@ -62,15 +62,12 @@ def create_aux_problem(dictionary, basis):
     #------------------------------------#
 
     #--create dictionary with omega------#
-    #auxillary = copy.deepcopy(dictionary)           #<-----might be bad for performance
     auxillary = dictionary
-    for row in range(len(auxillary)):
-        if row == 0:
-            for entry in range(len(auxillary[row])):               #<--- zero out first row
-                auxillary[row][entry] = 0
-            auxillary[row] = auxillary[row] + [-1]                #<--- add negative omega col
-        else:
-            auxillary[row] = auxillary[row] + [1]
+    auxillary[0] = np.array([0 for i in auxillary[0]])
+    new_col = [[1] for i in range(len(auxillary))]
+    new_col[0] = [-1]
+    auxillary = np.append(auxillary, new_col, axis=1)
+    
     basis = basis + [0]                            #<------add omega into basis vector as 0 since not in basis yet
 
     #---Find least feasible constraint---------#
@@ -85,7 +82,7 @@ def create_aux_problem(dictionary, basis):
         print("aux problem error")
         exit()
     
-    leaving_basis_var_col = -1                                  #<----pivot_col is the col of the leaving var
+    leaving_basis_var_col = -1                                  
     for col, var in enumerate(basis):               #<----- UPDATE THE BASIS: sub in omega and out the old basis var
         if var == 1:                                #<----should always be one
             if auxillary[least_feasible_row][col] == 1:     #<------means this is the basis var in the equation as all other basis vars must be 0 (a basis var cannot be expressed in terms of other basis var)
@@ -274,13 +271,12 @@ def main():
 
     #----------------------------
     #Check if initital dictionary feasible
-    #solve aux problem if not
+    #solve aux problem if not 
     if not_feasible(dictionary):
         original_obj_function = copy.deepcopy(dictionary[0])
         auxillary, basis = create_aux_problem(dictionary, basis)
+        #print(auxillary)
         auxillary, basis = solve(auxillary, basis)
-        print(auxillary)
-        print(basis)
 
         if get_obj_val(auxillary) != 0:
             print("Infeasible")
@@ -292,7 +288,6 @@ def main():
                 auxillary[i] = np.delete(auxillary[i],[-1])         #<- delete omega col
             
             auxillary = reintroduce(auxillary, basis, original_obj_function)
-        print(auxillary)
 
     #----------------------------
     else:
