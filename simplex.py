@@ -170,12 +170,11 @@ def do_pivot(dictionary, basis, pivot_col, pivot_row):
             rescaling_arr[i] = -1*factor
 
     dictionary[pivot_row] = np.divide(dictionary[pivot_row], rescaling_arr)
-    print(dictionary)
     
     #-------update rest of constraints--------------------------------#
     for eq_i, eq in enumerate(dictionary):
         if eq_i != pivot_row:
-            factor = np.array(dictionary[pivot_row]) * dictionary[eq_i][pivot_col]
+            factor = dictionary[pivot_row] * dictionary[eq_i][pivot_col]
             dictionary[eq_i] = np.array(dictionary[eq_i]) + factor                
             dictionary[eq_i][pivot_col] = 0 
 
@@ -185,7 +184,7 @@ def do_pivot(dictionary, basis, pivot_col, pivot_row):
             basis[i] = 1
         elif i == old_basis_col:
             basis[i] = 0
-
+    
     return(dictionary, basis)
 
 def solve(dictionary, basis):
