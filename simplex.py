@@ -167,7 +167,7 @@ def get_pivot(dictionary, basis, method):
                     pivot_row = i
 
     elif method == "Blands":
-        #----choose smallest index var not in basis to enter and var in basis w tightest bound to leave if tie choose lowest number-----#
+        #----choose smallest index var not in basis w positive coeff to enter and var in basis w tightest bound to leave if tie choose lowest number-----#
         #-------get pivot_col -> entering var--------#
         for i in range(1, len(basis)):
             if basis[i] == 0 and dictionary[0][i] > 0:
@@ -182,8 +182,10 @@ def get_pivot(dictionary, basis, method):
             if basis[i] == 1:
                 for eq in range(1, len(dictionary)):                                                         #<--- skip obj function row in basis
                     if dictionary[eq][i] == 1 and dictionary[eq][pivot_col] < 0:                             #<-correct row and row has neg coeff on entering var
-                        if abs(dictionary[eq][0] / dictionary[eq][pivot_col]) < cur_ratio or cur_ratio == -1 :  #<-tightest bound
+                        ratio = abs(dictionary[eq][0] / dictionary[eq][pivot_col])
+                        if ratio < cur_ratio or cur_ratio == -1 :  #<-tightest bound
                             pivot_row = eq
+                            cur_ratio = ratio
                             break
 
     #--------check for unboundedness------#
