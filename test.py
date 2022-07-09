@@ -24,7 +24,7 @@ def main():
     
     tableau = to_tableau(c, A, b)
   
-    print(np.array(tableau[0]))
+    print(b[1:])
     for i, val in enumerate(np.array(tableau[0])):
         if i > 0 and val > 0:
             break

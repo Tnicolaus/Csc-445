@@ -44,13 +44,22 @@ def make_dictionary():        #should read from stdin and return a dictionary fo
 
 #----ex degenerate pivots(2) lecture 8--------#
 #Worked with blands got optimal dictionary
+    #dictionary = np.array([
+    #    [Fraction(0), Fraction(1), Fraction(1), Fraction(1), Fraction(0), Fraction(0), Fraction(0)],
+    #    [Fraction(2), Fraction(-1), Fraction(-1), Fraction(0), Fraction(1), Fraction(0), Fraction(0)],
+    #    [Fraction(2), Fraction(-1), Fraction(0), Fraction(-1), Fraction(0), Fraction(1), Fraction(0)],
+    #    [Fraction(2), Fraction(0), Fraction(-1), Fraction(-1), Fraction(0), Fraction(0), Fraction(1)]
+    #])
+    #basis = [0,0,0,0,1,1,1]
+
+#---ex cycling(2) lecture 8----------#
     dictionary = np.array([
-        [Fraction(0), Fraction(1), Fraction(1), Fraction(1), Fraction(0), Fraction(0), Fraction(0)],
-        [Fraction(2), Fraction(-1), Fraction(-1), Fraction(0), Fraction(1), Fraction(0), Fraction(0)],
-        [Fraction(2), Fraction(-1), Fraction(0), Fraction(-1), Fraction(0), Fraction(1), Fraction(0)],
-        [Fraction(2), Fraction(0), Fraction(-1), Fraction(-1), Fraction(0), Fraction(0), Fraction(1)]
+        [Fraction(0), Fraction(3,4), Fraction(-20), Fraction(1,2), Fraction(-6), Fraction(0), Fraction(0), Fraction(0)],
+        [Fraction(0), Fraction(-1,4), Fraction(8), Fraction(1), Fraction(-9), Fraction(1), Fraction(0), Fraction(0)],
+        [Fraction(0), Fraction(-1,2), Fraction(12), Fraction(1,2), Fraction(-3), Fraction(0), Fraction(1), Fraction(0)],
+        [Fraction(1), Fraction(0), Fraction(0), Fraction(-1), Fraction(0), Fraction(0), Fraction(0), Fraction(1)]
     ])
-    basis = [0,0,0,0,1,1,1]
+    basis = [0,0,0,0,0,1,1,1]
 
 
 
@@ -236,17 +245,17 @@ def solve(dictionary, basis):
         prev_obj_val = dictionary[0][0]
         pivot_col, pivot_row, unbounded  = get_pivot(dictionary, basis, method)
 
+        print(method)
         print(pivot_col)
         print(pivot_row)
         #---------TODO-----------#
         # if unbounded is true need to deal with that probably end function here
         if unbounded == True:
-            print("UNBOUNDED")
+            print("unbounded")
             exit()
         #------------------------#
         dictionary, basis = do_pivot(dictionary, basis, pivot_col, pivot_row)
 
-        print(method)
         print(dictionary)
         print()
 
@@ -286,6 +295,30 @@ def reintroduce(dictionary, basis, obj_eq):
 
     return dictionary
 
+def get_optimal_point(dictionary, basis):
+    #---------idea------------#
+    # -num of slack variables is number of ones in the basis
+    # -we can count this and then if any ones occur in the basis before the index of the count
+    # -they must be optimization variables and they are basic so they have a value
+    vars = []
+    slack_vars = 0
+    for i in basis:
+        if i == 1:
+            slack_vars += 1
+    opt_vars = len(basis) - slack_vars
+    
+    print(slack_vars)
+    print(opt_vars)
+    for i in range(1, opt_vars):
+        if basis[i] == 1:
+            for row in range(len(dictionary)):
+                    if dictionary[row][i] == 1:
+                        vars.append(dictionary[row][0])
+        elif basis[i] == 0:
+            vars.append(0)
+        
+    return vars
+
 def main():
     # -------TODO----------------
     # make our initial dictionary
@@ -301,40 +334,33 @@ def main():
         auxillary, basis = solve(auxillary, basis)
         
         if get_obj_val(auxillary) != 0:
-            print("Infeasible")
+            print("infeasible")
             exit()
 
-        #-------Construct feasible dictionary or original LP------#
+        #-------Construct feasible dictionary for original LP------#
         else:
             auxillary = np.delete(auxillary, -1, 1)         #<- delete omega col
-            print()
-            print(auxillary)
-            print("before reintroduce\n")
+            del basis[-1]                                   #<- delete omega col   
 
-            auxillary = reintroduce(auxillary, basis, original_obj_function)
-            print(auxillary)
-            print("after reintroduced\n")
+            dictionary = reintroduce(auxillary, basis, original_obj_function)
+            dictionary, basis = solve(dictionary, basis)
+            print(dictionary)
+            print(basis)
 
-            auxillary, basis = solve(auxillary, basis)
-            print(auxillary)
-    #----------------------------
     else:
         dictionary, basis = solve(dictionary, basis)
         print(dictionary)
         print(basis)
 
-    #print(dictionary)
-    #print(basis)
-    #pivot_col, pivot_row, unbounded = get_pivot(dictionary, basis, "Largest_coeff")
-    #print(pivot_col)
-    #print(pivot_row)
-    #dictionary, basis = do_pivot(dictionary, basis, pivot_col, pivot_row)
-    #print(dictionary)
-    #print(basis)
+    #----------If were here dictionary is optimal----------#
+    optimization_vars = get_optimal_point(dictionary, basis)     #<- will be a list
+    print("optimal")
+    print(float(get_obj_val(dictionary)))
+    for val in optimization_vars:
+        print(float(val), end = ' ')
 
-    print('hi')
 
-    
+    print('\nhi')
 
 
 if __name__ == "__main__":
