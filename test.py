@@ -4,14 +4,6 @@ from tkinter.ttk import Separator
 import numpy as np
 from fractions import Fraction
 
-def to_tableau(c, A, b):
-    xb = [eq + [x] for eq, x in zip(A, b)]
-    z = c + [0]
-    arr = []
-    #print (arr + [[]] + [[]])
-    return xb + [z]
-
-
 def main():
  
     c = [Fraction(1,5), Fraction(1,1), 0, 0, 0]
@@ -21,15 +13,16 @@ def main():
         [ 0, 1, 0, 0, 1]
     ]
     b = [2, 4, 4]
-    
-    tableau = to_tableau(c, A, b)
-  
-    print(b[1:])
-    for i, val in enumerate(np.array(tableau[0])):
-        if i > 0 and val > 0:
-            break
-            #print("true")
 
+    #print(b.extend([0,0,0]))
+    line = '   \t     0.1    1.333  2     3.0\t4         5    \t \n'
+    line = line.strip().split()
+
+    #for char in line:
+    #    if char == ' ' or char == '\t':
+
+    print(line)
+  
     a = np.array([1,2,3,4,0], dtype=object)
     b = np.array(a)
     #print(b)
@@ -39,7 +32,7 @@ def main():
 
     l = Fraction(1,1)
     l = l/2
-    print(l)
+    #print(l)
     eq = np.array([
         [Fraction(1), Fraction(2)],
         [Fraction(3), Fraction(4)]
@@ -49,7 +42,7 @@ def main():
                     [5,6,7,8],
                     [9,10,11,12]]
                     )
-    print(Fraction(0) == 0)
+    #print(Fraction(0) == 0)
 
     eq[0][0] = Fraction(0)
     #print(eq)

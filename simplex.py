@@ -5,14 +5,37 @@ from fractions import Fraction
 
 def make_dictionary():        #should read from stdin and return a dictionary for the input LP
 #----------------------------------#
-# should read from stdin and return a dictionary for the input LP
+# should read from stdin and return a 2D array for the input LP
 # Will have Fractions as entries
 #----------------------------------#
-    #dictionary = [                #a setup dictionary [constants, x1, x2, w1, w2, w3] *for a 2 opt var, 3 constraint problem
-    #    [Fraction(0),Fraction(3),Fraction(-3),Fraction(-2),Fraction(0),Fraction(0)],
-    #    [Fraction(4),Fraction(-2),Fraction(2),Fraction(1),Fraction(1),Fraction(0)],
-    #    [Fraction(-5),Fraction(1),Fraction(-1),Fraction(3),Fraction(0),Fraction(1)]
-    #]
+# - iterate over lines in file ignore whitespace lines
+# - keep count of lines for number of slack vars
+# - put each line into a 2D list, re order entrys appropriately, first is different
+# - add zeros padding the end of each list for number of slack vars and ones for correct eqn
+    slack_vars = -1                         #<- first row is obj eq
+    dictionary = []
+
+    #------put each line into a list then into dictionary------#
+    for line in sys.stdin:                  
+        if not line.isspace():              
+            line = line.strip().split()
+            for i in range(len(line)):
+                line[i] = Fraction(line[i])
+            slack_vars += 1
+            if slack_vars == 0:             #<- if obj eq         
+                line = [0] + line           #<- add zero to first col of obj eq 
+            dictionary.append(line)
+    print(dictionary)
+    #------re-order the constraint lines so they are slack eq and zero pad each row and add basis 1-----#
+    for row, val in dictionary:
+        if row != 0:
+            print()
+        else:
+            for i in range(slack_vars):
+                dictionary[row].append([0])
+
+
+            
 
 #-----example 5 simplex examples 2-----#
 # worked until optimal 
@@ -53,13 +76,13 @@ def make_dictionary():        #should read from stdin and return a dictionary fo
     #basis = [0,0,0,0,1,1,1]
 
 #---ex cycling(2) lecture 8----------#
-    dictionary = np.array([
-        [Fraction(0), Fraction(3,4), Fraction(-20), Fraction(1,2), Fraction(-6), Fraction(0), Fraction(0), Fraction(0)],
-        [Fraction(0), Fraction(-1,4), Fraction(8), Fraction(1), Fraction(-9), Fraction(1), Fraction(0), Fraction(0)],
-        [Fraction(0), Fraction(-1,2), Fraction(12), Fraction(1,2), Fraction(-3), Fraction(0), Fraction(1), Fraction(0)],
-        [Fraction(1), Fraction(0), Fraction(0), Fraction(-1), Fraction(0), Fraction(0), Fraction(0), Fraction(1)]
-    ])
-    basis = [0,0,0,0,0,1,1,1]
+    #dictionary = np.array([
+    #    [Fraction(0), Fraction(3,4), Fraction(-20), Fraction(1,2), Fraction(-6), Fraction(0), Fraction(0), Fraction(0)],
+    #    [Fraction(0), Fraction(-1,4), Fraction(8), Fraction(1), Fraction(-9), Fraction(1), Fraction(0), Fraction(0)],
+    #    [Fraction(0), Fraction(-1,2), Fraction(12), Fraction(1,2), Fraction(-3), Fraction(0), Fraction(1), Fraction(0)],
+    #    [Fraction(1), Fraction(0), Fraction(0), Fraction(-1), Fraction(0), Fraction(0), Fraction(0), Fraction(1)]
+    #])
+    #basis = [0,0,0,0,0,1,1,1]
 
 
 
