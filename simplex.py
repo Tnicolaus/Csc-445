@@ -23,19 +23,39 @@ def make_dictionary():        #should read from stdin and return a dictionary fo
                 line[i] = Fraction(line[i])
             slack_vars += 1
             if slack_vars == 0:             #<- if obj eq         
-                line = [0] + line           #<- add zero to first col of obj eq 
+                line = [Fraction(0)] + line           #<- add zero to first col of obj eq 
             dictionary.append(line)
-
+    print(dictionary)
+    print()
     #------re-order the constraint lines so they are slack eq and zero pad each row and add basis 1-----#
-    for row, val in dictionary:
+    for row in range(len(dictionary)):
         if row != 0:
-            print()
+            #reorder inplace
+            slack_val = dictionary[row][-1]
+            for i in range(len(dictionary[row])-1, 0 , -1):
+                dictionary[row][i] = -1 * dictionary[row][i-1]
+            dictionary[row][0] = slack_val
+
+            for i in range(1, slack_vars+1):
+                if row != i:
+                    dictionary[row].append(Fraction(0))
+                else:
+                    dictionary[row].append(Fraction(1))
+
         else:
             for i in range(slack_vars):
-                dictionary[row].append([0])
+                dictionary[row].append(Fraction(0))
 
-
-            
+    print(dictionary)
+    print()
+    #-----make basis-------------------------------#
+    basis = []
+    for i in range(len(dictionary[0])):
+        if i < slack_vars - 1:
+            basis.append(0)
+        else:
+            basis.append(1)
+    print(basis)
 
 #-----example 5 simplex examples 2-----#
 # worked until optimal 
@@ -86,7 +106,7 @@ def make_dictionary():        #should read from stdin and return a dictionary fo
 
 
 
-    return dictionary, basis
+    return dictionary, basis, fake
 
 def not_feasible(dictionary):
     for i in range(1, len(dictionary)):

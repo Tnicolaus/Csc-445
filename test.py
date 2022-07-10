@@ -18,10 +18,12 @@ def main():
     line = '   \t     0.1    1.333  2     3.0\t4         5    \t \n'
     line = line.strip().split()
 
+    for i in range(1, 4+1):
+        print(i)
     #for char in line:
     #    if char == ' ' or char == '\t':
 
-    print(line)
+    #print(line)
   
     a = np.array([1,2,3,4,0], dtype=object)
     b = np.array(a)
