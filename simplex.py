@@ -25,8 +25,7 @@ def make_dictionary():        #should read from stdin and return a dictionary fo
             if slack_vars == 0:             #<- if obj eq         
                 line = [Fraction(0)] + line           #<- add zero to first col of obj eq 
             dictionary.append(line)
-    print(dictionary)
-    print()
+
     #------re-order the constraint lines so they are slack eq and zero pad each row and add basis 1-----#
     for row in range(len(dictionary)):
         if row != 0:
@@ -46,8 +45,6 @@ def make_dictionary():        #should read from stdin and return a dictionary fo
             for i in range(slack_vars):
                 dictionary[row].append(Fraction(0))
 
-    print(dictionary)
-    print()
     #-----make basis-------------------------------#
     basis = []
     for i in range(len(dictionary[0])):
@@ -55,7 +52,6 @@ def make_dictionary():        #should read from stdin and return a dictionary fo
             basis.append(0)
         else:
             basis.append(1)
-    print(basis)
 
 #-----example 5 simplex examples 2-----#
 # worked until optimal 
@@ -106,7 +102,7 @@ def make_dictionary():        #should read from stdin and return a dictionary fo
 
 
 
-    return dictionary, basis, fake
+    return dictionary, basis
 
 def not_feasible(dictionary):
     for i in range(1, len(dictionary)):
