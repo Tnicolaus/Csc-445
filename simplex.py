@@ -25,7 +25,7 @@ def make_dictionary():        #should read from stdin and return a dictionary fo
             if slack_vars == 0:             #<- if obj eq         
                 line = [0] + line           #<- add zero to first col of obj eq 
             dictionary.append(line)
-    print(dictionary)
+
     #------re-order the constraint lines so they are slack eq and zero pad each row and add basis 1-----#
     for row, val in dictionary:
         if row != 0:
