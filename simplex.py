@@ -413,12 +413,12 @@ def solve_aux(auxillary, basis):
         auxillary, basis = solve(auxillary, basis, method)
 
         if basis[-1] == 1:                              #<- omega in basis and degenerate
-            print("omega degenerate\n")                 #<- IF OMEGA NOT DEGENERRATE MIGHT BE INFEASIBLE
+            print("omega in basis\n")                 #<- IF OMEGA NOT DEGENERRATE MIGHT BE INFEASIBLE
             omega_row = None
             pivot_col = None
             method = "Blands"                           #<- to prevent cycling
 
-                #---------find row omega is in to pivot out(pivot_row)---------#
+                #---------find row omega is in to pivot out(pivot_row) if omega degenerate, if not degenerate -> infeasible---------#
             for row, eq  in enumerate(auxillary):      
                 if eq[-1] == 1:                         #<- this row is omega row as al others have omega 0 since its basic
                     omega_row = row
@@ -427,8 +427,12 @@ def solve_aux(auxillary, basis):
                 print("auxillary omega degenerate error")
                 exit()
 
+            if auxillary[omega_row][0] != 0:
+                print('infeasible')
+                exit()
+                
             #--------find first available col to pivot in(pivot_col)--------#
-            for col, val in enumerate(auxillary[omega_row]):
+            for col, val in enumerate(auxillary[omega_row]):                    #<-might not be degenerate could be infeasible
                 if val != 0 and auxillary[0][col] != 0:
                     pivot_col = col
                     break
