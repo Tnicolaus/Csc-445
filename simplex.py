@@ -12,54 +12,54 @@ def make_dictionary():        #should read from stdin and return a dictionary fo
 # - keep count of lines for number of slack vars
 # - put each line into a 2D list, re order entrys appropriately, first is different
 # - add zeros padding the end of each list for number of slack vars and ones for correct eqn
-    #slack_vars = -1                         #<- first row is obj eq
-    #dictionary = []
+    slack_vars = -1                         #<- first row is obj eq
+    dictionary = []
 
     #------put each line into a list then into dictionary------#
-    #for line in sys.stdin:                  
-    #    if not line.isspace():              
-    #        line = line.strip().split()
-    #        for i in range(len(line)):
-    #            line[i] = Fraction(line[i])
-    #        slack_vars += 1
-    #        if slack_vars == 0:             #<- if obj eq         
-    #            line = [Fraction(0)] + line           #<- add zero to first col of obj eq 
-    #        dictionary.append(line)
+    for line in sys.stdin:                  
+        if not line.isspace():              
+            line = line.strip().split()
+            for i in range(len(line)):
+                line[i] = Fraction(line[i])
+            slack_vars += 1
+            if slack_vars == 0:             #<- if obj eq         
+                line = [Fraction(0)] + line           #<- add zero to first col of obj eq 
+            dictionary.append(line)
 
     #------re-order the constraint lines so they are slack eq and zero pad each row and add basis 1-----#
-    #for row in range(len(dictionary)):
-    #    if row != 0:
-    #        #reorder inplace
-    #        slack_val = dictionary[row][-1]
-    #        for i in range(len(dictionary[row])-1, 0 , -1):
-    #           dictionary[row][i] = -1 * dictionary[row][i-1]
-    #        dictionary[row][0] = slack_val
+    for row in range(len(dictionary)):
+        if row != 0:
+            #reorder inplace
+            slack_val = dictionary[row][-1]
+            for i in range(len(dictionary[row])-1, 0 , -1):
+               dictionary[row][i] = -1 * dictionary[row][i-1]
+            dictionary[row][0] = slack_val
+    
+            for i in range(1, slack_vars+1):
+                if row != i:
+                    dictionary[row].append(Fraction(0))
+                else:
+                    dictionary[row].append(Fraction(1))
 
-    #        for i in range(1, slack_vars+1):
-    #            if row != i:
-    #                dictionary[row].append(Fraction(0))
-    #            else:
-    #                dictionary[row].append(Fraction(1))
+        else:
+            for i in range(slack_vars):
+                dictionary[row].append(Fraction(0))
 
-    #    else:
-    #        for i in range(slack_vars):
-    #            dictionary[row].append(Fraction(0))
-
-    #dictionary = np.array(dictionary)
+    dictionary = np.array(dictionary)
 
     #-----make basis-------------------------------#
-    #basis = []
-    #dim = len(dictionary[0])
-    #for i in range(dim):
-    #    if i < dim - slack_vars:
-    #        basis.append(0)
-    #    else:
-    #        basis.append(1)
+    basis = []
+    dim = len(dictionary[0])
+    for i in range(dim):
+        if i < dim - slack_vars:
+            basis.append(0)
+        else:
+            basis.append(1)
 
-    #print(dictionary)
-    #print()
-    #print(basis)
-    #print()
+    print(dictionary)
+    print()
+    print(basis)
+    print()
 
 
 #-----example 5 simplex examples 2-----#
@@ -129,6 +129,15 @@ def make_dictionary():        #should read from stdin and return a dictionary fo
     #    [Fraction(-1), Fraction(1), Fraction(1), Fraction(1), Fraction(1), Fraction(0), Fraction(1)]
     #])
     #basis = [0,0,0,0,0,1,1]
+
+#-----vanderbei_exercise2.6.txt-----------------#
+    #dictionary = np.array([
+    #    [Fraction(0), Fraction(1), Fraction(3), Fraction(0), Fraction(0), Fraction(0)],
+    #    [Fraction(-3), Fraction(1), Fraction(1), Fraction(1), Fraction(0), Fraction(0)],
+    #    [Fraction(-1), Fraction(1), Fraction(-1), Fraction(0), Fraction(1), Fraction(0)],
+    #    [Fraction(2), Fraction(-1), Fraction(-2), Fraction(0), Fraction(0), Fraction(1)]
+    #])
+    #basis = [0,0,0,1,1,1]
 
     return dictionary, basis
 
@@ -404,6 +413,7 @@ def solve_aux(auxillary, basis):
         auxillary, basis = solve(auxillary, basis, method)
 
         if basis[-1] == 1:                              #<- omega in basis and degenerate
+            print("omega degenerate\n")                 #<- IF OMEGA NOT DEGENERRATE MIGHT BE INFEASIBLE
             omega_row = None
             pivot_col = None
             method = "Blands"                           #<- to prevent cycling
@@ -434,8 +444,7 @@ def solve_aux(auxillary, basis):
     return(auxillary, basis)
 
 def main():
-    # -------TODO----------------
-    # make our initial dictionary
+    
     dictionary, basis = make_dictionary()
 
     #----------------------------
