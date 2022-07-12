@@ -314,12 +314,10 @@ def do_pivot(dictionary, basis, pivot_col, pivot_row):
 def get_obj_val(dictionary):
     return dictionary[0][0]
 
-def solve(dictionary, basis):
+def solve(dictionary, basis, method):
     #-watchout for unboundedness
     #-watch for cycling 
     #-All dictionaries are a list of "numpy arrays" 
-
-    method = "Largest_coeff"
 
     while not_optimal(dictionary):
         prev_obj_val = dictionary[0][0]
@@ -395,6 +393,48 @@ def get_optimal_point(dictionary, basis):
         
     return vars
 
+def solve_aux(auxillary, basis):
+     #------solve auxillary problem loop until omega not in basis in degenerate case-----#
+    method = "Largest_coeff"
+    while basis[-1] == 1:                               #<- deal with case where omega in basis and degenerate pivot until optimal and its not
+        auxillary, basis = solve(auxillary, basis, method)
+
+        print("auxillary solved")
+        print(auxillary)
+        print(basis)
+        print()
+
+        if basis[-1] == 1:                              #<- omega in basis and degenerate
+            omega_row = None
+            pivot_col = None
+            method = "Blands"                           #<- to prevent cycling
+
+                #---------find row omega is in to pivot out(pivot_row)---------#
+            for row, eq  in enumerate(auxillary):      
+                if eq[-1] == 1:                         #<- this row is omega row as al others have omega 0 since its basic
+                    omega_row = row
+
+
+            if omega_row == None:
+                print("auxillary omega degenerate error")
+                exit()
+
+            #--------find first available col to pivot in(pivot_col)--------#
+            for col, val in enumerate(auxillary[omega_row]):
+                if val != 0 and auxillary[0][col] != 0:
+                    pivot_col = col
+                    break
+
+                
+            if pivot_col == None:
+                print("auxillary degenerate omega error") 
+                exit()
+
+            #-----do pivot-----------#
+            auxillary, basis = do_pivot(auxillary, basis, pivot_col, omega_row)
+
+    return(auxillary, basis)
+
 def main():
     # -------TODO----------------
     # make our initial dictionary
@@ -406,14 +446,20 @@ def main():
     if not_feasible(dictionary):
         original_obj_function = copy.deepcopy(dictionary[0])
         auxillary, basis = create_aux_problem(dictionary, basis)
+
         print("auxillary")
         print(auxillary)
+        print(basis)
         print()
-        auxillary, basis = solve(auxillary, basis)
+
+        #------solve auxillary problem-----#
+        auxillary, basis = solve_aux(auxillary, basis)
+
         print("auxillary solved")
         print(auxillary)
         print(basis)
         print()
+
         if get_obj_val(auxillary) != 0:
             print("infeasible")
             exit()
@@ -421,7 +467,7 @@ def main():
         #-------Construct feasible dictionary for original LP------#
         else:
             auxillary = np.delete(auxillary, -1, 1)         #<- delete omega col
-            del basis[-1]                                   #<- delete omega col   
+            del basis[-1]                                   #<- delete omega col **can only do when were sure omega is not in basis
 
             dictionary = reintroduce(auxillary, basis, original_obj_function)
             print("dictionary")
@@ -429,12 +475,12 @@ def main():
             print()
             print(basis)
             print()
-            dictionary, basis = solve(dictionary, basis)
+            dictionary, basis = solve(dictionary, basis, method = "Largest_coeff")
             print(dictionary)
             print(basis)
 
     else:
-        dictionary, basis = solve(dictionary, basis)
+        dictionary, basis = solve(dictionary, basis, method = "Largest_coeff")
         print(dictionary)
         print(basis)
 
