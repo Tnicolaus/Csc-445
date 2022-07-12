@@ -12,46 +12,55 @@ def make_dictionary():        #should read from stdin and return a dictionary fo
 # - keep count of lines for number of slack vars
 # - put each line into a 2D list, re order entrys appropriately, first is different
 # - add zeros padding the end of each list for number of slack vars and ones for correct eqn
-    slack_vars = -1                         #<- first row is obj eq
-    dictionary = []
+    #slack_vars = -1                         #<- first row is obj eq
+    #dictionary = []
 
     #------put each line into a list then into dictionary------#
-    for line in sys.stdin:                  
-        if not line.isspace():              
-            line = line.strip().split()
-            for i in range(len(line)):
-                line[i] = Fraction(line[i])
-            slack_vars += 1
-            if slack_vars == 0:             #<- if obj eq         
-                line = [Fraction(0)] + line           #<- add zero to first col of obj eq 
-            dictionary.append(line)
+    #for line in sys.stdin:                  
+    #    if not line.isspace():              
+    #        line = line.strip().split()
+    #        for i in range(len(line)):
+    #            line[i] = Fraction(line[i])
+    #        slack_vars += 1
+    #        if slack_vars == 0:             #<- if obj eq         
+    #            line = [Fraction(0)] + line           #<- add zero to first col of obj eq 
+    #        dictionary.append(line)
 
     #------re-order the constraint lines so they are slack eq and zero pad each row and add basis 1-----#
-    for row in range(len(dictionary)):
-        if row != 0:
-            #reorder inplace
-            slack_val = dictionary[row][-1]
-            for i in range(len(dictionary[row])-1, 0 , -1):
-                dictionary[row][i] = -1 * dictionary[row][i-1]
-            dictionary[row][0] = slack_val
+    #for row in range(len(dictionary)):
+    #    if row != 0:
+    #        #reorder inplace
+    #        slack_val = dictionary[row][-1]
+    #        for i in range(len(dictionary[row])-1, 0 , -1):
+    #           dictionary[row][i] = -1 * dictionary[row][i-1]
+    #        dictionary[row][0] = slack_val
 
-            for i in range(1, slack_vars+1):
-                if row != i:
-                    dictionary[row].append(Fraction(0))
-                else:
-                    dictionary[row].append(Fraction(1))
+    #        for i in range(1, slack_vars+1):
+    #            if row != i:
+    #                dictionary[row].append(Fraction(0))
+    #            else:
+    #                dictionary[row].append(Fraction(1))
 
-        else:
-            for i in range(slack_vars):
-                dictionary[row].append(Fraction(0))
+    #    else:
+    #        for i in range(slack_vars):
+    #            dictionary[row].append(Fraction(0))
+
+    #dictionary = np.array(dictionary)
 
     #-----make basis-------------------------------#
-    basis = []
-    for i in range(len(dictionary[0])):
-        if i < slack_vars - 1:
-            basis.append(0)
-        else:
-            basis.append(1)
+    #basis = []
+    #dim = len(dictionary[0])
+    #for i in range(dim):
+    #    if i < dim - slack_vars:
+    #        basis.append(0)
+    #    else:
+    #        basis.append(1)
+
+    #print(dictionary)
+    #print()
+    #print(basis)
+    #print()
+
 
 #-----example 5 simplex examples 2-----#
 # worked until optimal 
@@ -100,7 +109,22 @@ def make_dictionary():        #should read from stdin and return a dictionary fo
     #])
     #basis = [0,0,0,0,0,1,1,1]
 
+#---ex 1 simplex examples 1----------#
+    #dictionary = np.array([
+    #    [Fraction(0), Fraction(8), Fraction(4), Fraction(2), Fraction(0), Fraction(0), Fraction(0), Fraction(0)],
+    #    [Fraction(8), Fraction(-2), Fraction(-4), Fraction(0), Fraction(1), Fraction(0), Fraction(0), Fraction(0)],
+    #    [Fraction(4), Fraction(-1), Fraction(-1), Fraction(-1), Fraction(0), Fraction(1), Fraction(0), Fraction(0)],
+    #    [Fraction(1), Fraction(-1), Fraction(0), Fraction(0), Fraction(0), Fraction(0), Fraction(1), Fraction(0)],
+    #    [Fraction(1), Fraction(0), Fraction(-1), Fraction(1), Fraction(0), Fraction(0), Fraction(0), Fraction(1)]
+    #])
+    #basis = [0,0,0,0,1,1,1,1,]
 
+    dictionary = np.array([
+        [Fraction(0), Fraction(6), Fraction(8), Fraction(5), Fraction(9), Fraction(0), Fraction(0)],
+        [Fraction(1), Fraction(-1), Fraction(-1), Fraction(-1), Fraction(-1), Fraction(1), Fraction(0)],
+        [Fraction(-1), Fraction(1), Fraction(1), Fraction(1), Fraction(1), Fraction(0), Fraction(1)]
+    ])
+    basis = [0,0,0,0,0,1,1]
 
     return dictionary, basis
 
@@ -140,6 +164,7 @@ def create_aux_problem(dictionary, basis):
         print("aux problem error")
         exit()
     
+
     leaving_basis_var_col = -1                                  
     for col, var in enumerate(basis):               #<----- UPDATE THE BASIS: sub in omega and out the old basis var
         if var == 1:                                #<----should always be one
@@ -148,7 +173,11 @@ def create_aux_problem(dictionary, basis):
                 basis[-1] = 1
                 leaving_basis_var_col = col
                 break
-    
+    #print("auxillary")
+    #print(auxillary)
+    #print()
+    #print(basis)
+    #print()
     #---------------pivot in omega for least feasible constraint---------------#
     #auxillary[least_feasible_row] = np.array(auxillary[least_feasible_row]) / -1        #<---- DO PIVOT IN PIVOT ROW (will work with fractions)
     auxillary[least_feasible_row] = auxillary[least_feasible_row] / -1        #<---- DO PIVOT IN PIVOT ROW (will work with fractions)
@@ -156,6 +185,11 @@ def create_aux_problem(dictionary, basis):
     auxillary[least_feasible_row][leaving_basis_var_col] = Fraction(1)                                        #<---- set old basis_var to 1 snce math messed up and made it -1
     auxillary[least_feasible_row][-1] = Fraction(1)                                               #<---- set omega to 1 math made it -1 aswell
     
+    #print("auxillary after sub LF row")
+    #print(auxillary)
+    #print()
+    #print(basis)
+    #print()
     #-------------substitute into rest of constraints--------------------------#
     # pivot_col is the entering var, will always be omega thus pivot_col = -1(last col)
     #--------------------------------------------------------------------------#
@@ -167,6 +201,11 @@ def create_aux_problem(dictionary, basis):
 
             auxillary[eq_i][-1] = Fraction(0)                                      #<------ set basic var to 0 in eqn that dont involve it
 
+    #print("auxillary after sub rest row")
+    #print(auxillary)
+    #print()
+    #print(basis)
+    #print()
     return auxillary, basis
 
 def not_optimal(dictionary):
@@ -320,11 +359,9 @@ def reintroduce(dictionary, basis, obj_eq):
 
     for col in range(len(obj_eq)):
         if basis[col] == 1 and obj_eq[col] != 0:                     #<- If var in basis and in obj function
-            print(col, "<- col")
             coeff_of_var = obj_eq[col]
             obj_eq[col] = Fraction(0)                                #<- zero out subed in var in obj function
             for row in range(1,len(dictionary)):
-                print(row)
                 if dictionary[row][col] == 1:
                     eqn_for_var = copy.deepcopy(dictionary[row])
                     eqn_for_var[col] = Fraction(0)                   #<- zero out subed in var in constraint eqn
@@ -348,8 +385,6 @@ def get_optimal_point(dictionary, basis):
             slack_vars += 1
     opt_vars = len(basis) - slack_vars
     
-    print(slack_vars)
-    print(opt_vars)
     for i in range(1, opt_vars):
         if basis[i] == 1:
             for row in range(len(dictionary)):
@@ -371,9 +406,14 @@ def main():
     if not_feasible(dictionary):
         original_obj_function = copy.deepcopy(dictionary[0])
         auxillary, basis = create_aux_problem(dictionary, basis)
-
+        print("auxillary")
+        print(auxillary)
+        print()
         auxillary, basis = solve(auxillary, basis)
-        
+        print("auxillary solved")
+        print(auxillary)
+        print(basis)
+        print()
         if get_obj_val(auxillary) != 0:
             print("infeasible")
             exit()
@@ -384,6 +424,11 @@ def main():
             del basis[-1]                                   #<- delete omega col   
 
             dictionary = reintroduce(auxillary, basis, original_obj_function)
+            print("dictionary")
+            print(dictionary)
+            print()
+            print(basis)
+            print()
             dictionary, basis = solve(dictionary, basis)
             print(dictionary)
             print(basis)
