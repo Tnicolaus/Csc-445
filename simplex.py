@@ -186,23 +186,13 @@ def create_aux_problem(dictionary, basis):
                 basis[-1] = 1
                 leaving_basis_var_col = col
                 break
-    #print("auxillary")
-    #print(auxillary)
-    #print()
-    #print(basis)
-    #print()
+   
     #---------------pivot in omega for least feasible constraint---------------#
     #auxillary[least_feasible_row] = np.array(auxillary[least_feasible_row]) / -1        #<---- DO PIVOT IN PIVOT ROW (will work with fractions)
     auxillary[least_feasible_row] = auxillary[least_feasible_row] / -1        #<---- DO PIVOT IN PIVOT ROW (will work with fractions)
-
     auxillary[least_feasible_row][leaving_basis_var_col] = Fraction(1)                                        #<---- set old basis_var to 1 snce math messed up and made it -1
     auxillary[least_feasible_row][-1] = Fraction(1)                                               #<---- set omega to 1 math made it -1 aswell
     
-    #print("auxillary after sub LF row")
-    #print(auxillary)
-    #print()
-    #print(basis)
-    #print()
     #-------------substitute into rest of constraints--------------------------#
     # pivot_col is the entering var, will always be omega thus pivot_col = -1(last col)
     #--------------------------------------------------------------------------#
@@ -214,11 +204,6 @@ def create_aux_problem(dictionary, basis):
 
             auxillary[eq_i][-1] = Fraction(0)                                      #<------ set basic var to 0 in eqn that dont involve it
 
-    #print("auxillary after sub rest row")
-    #print(auxillary)
-    #print()
-    #print(basis)
-    #print()
     return auxillary, basis
 
 def not_optimal(dictionary):
@@ -336,9 +321,9 @@ def solve(dictionary, basis, method):
         prev_obj_val = dictionary[0][0]
         pivot_col, pivot_row, unbounded  = get_pivot(dictionary, basis, method)
 
-        print(method)
-        print(pivot_col)
-        print(pivot_row)
+        #print(method)
+        #print(pivot_col)
+        #print(pivot_row)
         #---------TODO-----------#
         # if unbounded is true need to deal with that probably end function here
         if unbounded == True:
@@ -347,8 +332,8 @@ def solve(dictionary, basis, method):
         #------------------------#
         dictionary, basis = do_pivot(dictionary, basis, pivot_col, pivot_row)
 
-        print(dictionary)
-        print()
+        #print(dictionary)
+        #print()
 
         new_obj_val = dictionary[0][0]
         if new_obj_val == prev_obj_val:                                 #<---- if obj val remains constant -> degeneracy -> could be cycling, use blands to avoid
@@ -430,7 +415,7 @@ def solve_aux(auxillary, basis):
             if auxillary[omega_row][0] != 0:
                 print('infeasible')
                 exit()
-                
+
             #--------find first available col to pivot in(pivot_col)--------#
             for col, val in enumerate(auxillary[omega_row]):                    #<-might not be degenerate could be infeasible
                 if val != 0 and auxillary[0][col] != 0:
@@ -481,19 +466,12 @@ def main():
             del basis[-1]                                   #<- delete omega col **can only do when were sure omega is not in basis
 
             dictionary = reintroduce(auxillary, basis, original_obj_function)
-            print("dictionary")
-            print(dictionary)
-            print()
-            print(basis)
-            print()
             dictionary, basis = solve(dictionary, basis, method = "Largest_coeff")
-            print(dictionary)
-            print(basis)
+            
 
     else:
         dictionary, basis = solve(dictionary, basis, method = "Largest_coeff")
-        print(dictionary)
-        print(basis)
+       
 
     #----------If were here dictionary is optimal----------#
     optimization_vars = get_optimal_point(dictionary, basis)     #<- will be a list
