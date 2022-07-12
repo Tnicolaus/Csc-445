@@ -101,6 +101,7 @@ def make_dictionary():        #should read from stdin and return a dictionary fo
     #basis = [0,0,0,0,1,1,1]
 
 #---ex cycling(2) lecture 8----------#
+#worked got optimal 1.25
     #dictionary = np.array([
     #    [Fraction(0), Fraction(3,4), Fraction(-20), Fraction(1,2), Fraction(-6), Fraction(0), Fraction(0), Fraction(0)],
     #    [Fraction(0), Fraction(-1,4), Fraction(8), Fraction(1), Fraction(-9), Fraction(1), Fraction(0), Fraction(0)],
@@ -110,6 +111,7 @@ def make_dictionary():        #should read from stdin and return a dictionary fo
     #basis = [0,0,0,0,0,1,1,1]
 
 #---ex 1 simplex examples 1----------#
+#worked got optimal 17
     #dictionary = np.array([
     #    [Fraction(0), Fraction(8), Fraction(4), Fraction(2), Fraction(0), Fraction(0), Fraction(0), Fraction(0)],
     #    [Fraction(8), Fraction(-2), Fraction(-4), Fraction(0), Fraction(1), Fraction(0), Fraction(0), Fraction(0)],
@@ -119,12 +121,14 @@ def make_dictionary():        #should read from stdin and return a dictionary fo
     #])
     #basis = [0,0,0,0,1,1,1,1,]
 
-    dictionary = np.array([
-        [Fraction(0), Fraction(6), Fraction(8), Fraction(5), Fraction(9), Fraction(0), Fraction(0)],
-        [Fraction(1), Fraction(-1), Fraction(-1), Fraction(-1), Fraction(-1), Fraction(1), Fraction(0)],
-        [Fraction(-1), Fraction(1), Fraction(1), Fraction(1), Fraction(1), Fraction(0), Fraction(1)]
-    ])
-    basis = [0,0,0,0,0,1,1]
+#------vanderbei_exercise2.10.txt----------------#
+
+    #dictionary = np.array([
+    #    [Fraction(0), Fraction(6), Fraction(8), Fraction(5), Fraction(9), Fraction(0), Fraction(0)],
+    #    [Fraction(1), Fraction(-1), Fraction(-1), Fraction(-1), Fraction(-1), Fraction(1), Fraction(0)],
+    #    [Fraction(-1), Fraction(1), Fraction(1), Fraction(1), Fraction(1), Fraction(0), Fraction(1)]
+    #])
+    #basis = [0,0,0,0,0,1,1]
 
     return dictionary, basis
 
@@ -399,11 +403,6 @@ def solve_aux(auxillary, basis):
     while basis[-1] == 1:                               #<- deal with case where omega in basis and degenerate pivot until optimal and its not
         auxillary, basis = solve(auxillary, basis, method)
 
-        print("auxillary solved")
-        print(auxillary)
-        print(basis)
-        print()
-
         if basis[-1] == 1:                              #<- omega in basis and degenerate
             omega_row = None
             pivot_col = None
@@ -413,7 +412,6 @@ def solve_aux(auxillary, basis):
             for row, eq  in enumerate(auxillary):      
                 if eq[-1] == 1:                         #<- this row is omega row as al others have omega 0 since its basic
                     omega_row = row
-
 
             if omega_row == None:
                 print("auxillary omega degenerate error")
