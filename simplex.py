@@ -12,54 +12,54 @@ def make_dictionary():        #should read from stdin and return a dictionary fo
 # - keep count of lines for number of slack vars
 # - put each line into a 2D list, re order entrys appropriately, first is different
 # - add zeros padding the end of each list for number of slack vars and ones for correct eqn
-    slack_vars = -1                         #<- first row is obj eq
-    dictionary = []
+    #slack_vars = -1                         #<- first row is obj eq
+    #dictionary = []
 
     #------put each line into a list then into dictionary------#
-    for line in sys.stdin:                  
-        if not line.isspace():              
-            line = line.strip().split()
-            for i in range(len(line)):
-                line[i] = Fraction(line[i])
-            slack_vars += 1
-            if slack_vars == 0:             #<- if obj eq         
-                line = [Fraction(0)] + line           #<- add zero to first col of obj eq 
-            dictionary.append(line)
+    #for line in sys.stdin:                  
+    #    if not line.isspace():              
+    #        line = line.strip().split()
+    #        for i in range(len(line)):
+    #            line[i] = Fraction(line[i])
+    #        slack_vars += 1
+    #        if slack_vars == 0:             #<- if obj eq         
+    #            line = [Fraction(0)] + line           #<- add zero to first col of obj eq 
+    #        dictionary.append(line)
 
     #------re-order the constraint lines so they are slack eq and zero pad each row and add basis 1-----#
-    for row in range(len(dictionary)):
-        if row != 0:
+    #for row in range(len(dictionary)):
+    #    if row != 0:
             #reorder inplace
-            slack_val = dictionary[row][-1]
-            for i in range(len(dictionary[row])-1, 0 , -1):
-               dictionary[row][i] = -1 * dictionary[row][i-1]
-            dictionary[row][0] = slack_val
+    #        slack_val = dictionary[row][-1]
+    #        for i in range(len(dictionary[row])-1, 0 , -1):
+    #           dictionary[row][i] = -1 * dictionary[row][i-1]
+    #        dictionary[row][0] = slack_val
     
-            for i in range(1, slack_vars+1):
-                if row != i:
-                    dictionary[row].append(Fraction(0))
-                else:
-                    dictionary[row].append(Fraction(1))
+    #        for i in range(1, slack_vars+1):
+    #            if row != i:
+    #                dictionary[row].append(Fraction(0))
+    #            else:
+    #                dictionary[row].append(Fraction(1))
 
-        else:
-            for i in range(slack_vars):
-                dictionary[row].append(Fraction(0))
+    #    else:
+    #        for i in range(slack_vars):
+    #            dictionary[row].append(Fraction(0))
 
-    dictionary = np.array(dictionary)
+    #dictionary = np.array(dictionary)
 
     #-----make basis-------------------------------#
-    basis = []
-    dim = len(dictionary[0])
-    for i in range(dim):
-        if i < dim - slack_vars:
-            basis.append(0)
-        else:
-            basis.append(1)
+    #basis = []
+    #dim = len(dictionary[0])
+    #for i in range(dim):
+    #    if i < dim - slack_vars:
+    #        basis.append(0)
+    #    else:
+    #        basis.append(1)
 
-    print(dictionary)
-    print()
-    print(basis)
-    print()
+    #print(dictionary)
+    #print()
+    #print(basis)
+    #print()
 
 
 #-----example 5 simplex examples 2-----#
@@ -138,6 +138,17 @@ def make_dictionary():        #should read from stdin and return a dictionary fo
     #    [Fraction(2), Fraction(-1), Fraction(-2), Fraction(0), Fraction(0), Fraction(1)]
     #])
     #basis = [0,0,0,1,1,1]
+
+#-----Largest Increase Rule(3) lecture 9 (pivoting rules)-----------#
+    dictionary = np.array([
+        [Fraction(0), Fraction(1), Fraction(2), Fraction(0), Fraction(0), Fraction(0), Fraction(0), Fraction(0)],
+        [Fraction(1), Fraction(3), Fraction(-1), Fraction(1), Fraction(0), Fraction(0), Fraction(0), Fraction(0)],
+        [Fraction(3), Fraction(2), Fraction(-2), Fraction(0), Fraction(1), Fraction(0), Fraction(0), Fraction(0)],
+        [Fraction(8), Fraction(1), Fraction(-3), Fraction(0), Fraction(0), Fraction(1), Fraction(0), Fraction(0)],
+        [Fraction(11), Fraction(0), Fraction(-3), Fraction(0), Fraction(0), Fraction(0), Fraction(1), Fraction(0)],
+        [Fraction(7), Fraction(-3), Fraction(1), Fraction(0), Fraction(0), Fraction(0), Fraction(0), Fraction(1)]
+    ])
+    basis = [0,0,0,1,1,1,1,1]
 
     return dictionary, basis
 
@@ -266,6 +277,45 @@ def get_pivot(dictionary, basis, method):
                             pivot_row = eq
                             cur_ratio = ratio
                             break
+    
+    elif method == "Largest_increase":
+        biggest_increase = -1
+        best_pivot_col = None
+        best_pivot_row = None
+        
+        j = 0
+        while j < len(dictionary[0]):
+            pivot_col = j
+            print(pivot_col)
+            if dictionary[0][pivot_col] > 0:
+                print(pivot_col, " <-pivot_col")
+                #-----get pivot_row for this pivot_col--------#
+                for i in range(1, len(dictionary)):
+                    eq = dictionary[i]
+                    if eq[pivot_col] < 0:
+                        cur_limiting_val = abs(eq[0] / eq[pivot_col])                     #<--- check restriction imposed by entering var in this eqn
+                        if min_limiting_val == None or cur_limiting_val < min_limiting_val:      #<- it is a bound and (no bound is set or its a min bound)
+                            min_limiting_val = cur_limiting_val
+                            pivot_row = i                                                   #<- might be some errors in case of ties!!!!!!!!!!!
+                print(pivot_row, " <-pivot_row")
+
+                if pivot_row == None:
+                    print("unbounded")
+                    exit()
+
+                #-----compute increase in obj_function-------#
+                increase = get_obj_increase(dictionary, basis, pivot_col, pivot_row)
+                print(increase, " <-increase")
+                if increase > biggest_increase:
+                    best_pivot_col = pivot_col
+                    best_pivot_row = pivot_row
+                    biggest_increase = increase
+            j += 1
+
+        pivot_col = best_pivot_col
+        pivot_row = best_pivot_row
+
+        print("largest increase")
 
     #--------check for unboundedness------#
     if pivot_row == None:
@@ -273,6 +323,46 @@ def get_pivot(dictionary, basis, method):
         
     print("leaving get_pivot\n")
     return pivot_col, pivot_row, unbounded
+
+def get_obj_increase(dictionary, basis, pivot_col, pivot_row):
+    #----idea---------#
+    # -create copy of obj function and pivot_row
+    # -do pivot in pivot row copy
+    # -sub into obj function copy 
+    # -calculate increase
+    increase = -1
+    copy_pivot_row = copy.deepcopy(dictionary[pivot_row])
+    copy_obj_function = copy.deepcopy(dictionary[0])
+    old_obj_val = copy.deepcopy(copy_obj_function[0])
+
+    #---do pivot in copy_pivot_row (from do_pivot)-----------#
+    factor = copy_pivot_row[pivot_col]
+    rescaling_arr = [None] * len(copy_pivot_row)                                          #<- for dividing the numpy array at pivot row by the correct factors
+    rescaling_arr = np.array(rescaling_arr)
+    
+    for i in range(len(copy_pivot_row)):                 #<- create rescaling_arr with the appropriate factors based on entering var having negative coefficient
+        if basis[i] == 1 and copy_pivot_row[i] == 1:     #<- if we are the old basis var flip sign
+            rescaling_arr[i] = factor
+        elif i == pivot_col:                                    #<- if we are the entering var flip sign (the math messes this up)
+            rescaling_arr[i] = factor
+        else:
+            rescaling_arr[i] = -1*factor
+
+    copy_pivot_row = np.divide(copy_pivot_row, rescaling_arr)
+    print(copy_pivot_row, " <-copy_pivot_row\n")
+
+    #----------sub in copy_pivot_row into obj function and calc increase----------#
+    col = 0
+    constant = copy.deepcopy(copy_obj_function[pivot_col])
+    while col < len(copy_obj_function):
+        copy_obj_function[col] = copy_obj_function[col] + (copy_pivot_row[col] * constant)
+        col += 1
+    copy_obj_function[pivot_col] = Fraction(0)
+    print(copy_obj_function, " <-new obj function\n")
+
+    increase = copy_obj_function[0] - old_obj_val 
+
+    return(increase)
 
 def do_pivot(dictionary, basis, pivot_col, pivot_row):
     print("in do pivot")
@@ -463,6 +553,14 @@ def solve_aux(auxillary, basis):
 def main():
     
     dictionary, basis = make_dictionary()
+
+    #---Test for largest increase---#
+    #pivot_col, pivot_row, unbounded = get_pivot(dictionary, basis, method = "Largest_increase")
+    #print(pivot_col, " <-pivot_col")
+    #print(pivot_row, " <-pivot_row")
+    #print()
+    #exit()
+    #---Test for largest increase---#
 
     #----------------------------
     #Check if initital dictionary feasible
