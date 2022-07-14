@@ -56,12 +56,6 @@ def make_dictionary():        #should read from stdin and return a dictionary fo
         else:
             basis.append(1)
 
-    #print(dictionary)
-    #print()
-    #print(basis)
-    #print()
-
-
 #-----example 5 simplex examples 2-----#
 # worked until optimal 
     #dictionary = np.array([
@@ -174,11 +168,11 @@ def create_aux_problem(dictionary, basis):
     new_col[0] = [Fraction(-1)]
     auxillary = np.append(auxillary, new_col, axis=1)
     
-    basis = basis + [0]                            #<------add omega into basis vector as 0 since not in basis yet
+    basis = basis + [0]                             #<------add omega into basis vector as 0 since not in basis yet
 
     #---Find least feasible constraint---------#
     min = 0
-    least_feasible_row = -1                     #<------FIND LEAST FEASIBLE CONSTRAINT TO SWAP FOR OMEGA
+    least_feasible_row = -1                         #<------FIND LEAST FEASIBLE CONSTRAINT TO SWAP FOR OMEGA
     for i, row in enumerate(auxillary):
         if row[0] < min:
             min = row[0]
@@ -190,9 +184,9 @@ def create_aux_problem(dictionary, basis):
     
 
     leaving_basis_var_col = -1                                  
-    for col, var in enumerate(basis):               #<----- UPDATE THE BASIS: sub in omega and out the old basis var
-        if var == 1:                                #<----should always be one
-            if auxillary[least_feasible_row][col] == 1:     #<------means this is the basis var in the equation as all other basis vars must be 0 (a basis var cannot be expressed in terms of other basis var)
+    for col, var in enumerate(basis):                       #<----- UPDATE THE BASIS: sub in omega and out the old basis var
+        if var == 1:                                        #<----- should always be one
+            if auxillary[least_feasible_row][col] == 1:     #<----- means this is the basis var in the equation as all other basis vars must be 0 (a basis var cannot be expressed in terms of other basis var)
                 basis[col] = 0
                 basis[-1] = 1
                 leaving_basis_var_col = col
@@ -200,9 +194,9 @@ def create_aux_problem(dictionary, basis):
    
     #---------------pivot in omega for least feasible constraint---------------#
     #auxillary[least_feasible_row] = np.array(auxillary[least_feasible_row]) / -1        #<---- DO PIVOT IN PIVOT ROW (will work with fractions)
-    auxillary[least_feasible_row] = auxillary[least_feasible_row] / -1        #<---- DO PIVOT IN PIVOT ROW (will work with fractions)
-    auxillary[least_feasible_row][leaving_basis_var_col] = Fraction(1)                                        #<---- set old basis_var to 1 snce math messed up and made it -1
-    auxillary[least_feasible_row][-1] = Fraction(1)                                               #<---- set omega to 1 math made it -1 aswell
+    auxillary[least_feasible_row] = auxillary[least_feasible_row] / -1                   #<---- DO PIVOT IN PIVOT ROW (will work with fractions)
+    auxillary[least_feasible_row][leaving_basis_var_col] = Fraction(1)                   #<---- set old basis_var to 1 snce math messed up and made it -1
+    auxillary[least_feasible_row][-1] = Fraction(1)                                      #<---- set omega to 1 math made it -1 aswell
     
     #-------------substitute into rest of constraints--------------------------#
     # pivot_col is the entering var, will always be omega thus pivot_col = -1(last col)
@@ -225,7 +219,6 @@ def not_optimal(dictionary):
     return False
 
 def get_pivot(dictionary, basis, method):
-    #print("in get_pivot")
     #-----------------------------------#
     # returns a pivot_col(entering var)
     # a pivot_row(leaving var) and weather
@@ -249,7 +242,7 @@ def get_pivot(dictionary, basis, method):
         for i in range(1, len(dictionary)):
             eq = dictionary[i]
             if eq[pivot_col] < 0:
-                cur_limiting_val = abs(eq[0] / eq[pivot_col])                     #<--- check restriction imposed by entering var in this eqn
+                cur_limiting_val = abs(eq[0] / eq[pivot_col])                            #<- check restriction imposed by entering var in this eqn
                 if min_limiting_val == None or cur_limiting_val < min_limiting_val:      #<- it is a bound and (no bound is set or its a min bound)
                     min_limiting_val = cur_limiting_val
                     pivot_row = i
@@ -271,7 +264,7 @@ def get_pivot(dictionary, basis, method):
                 for eq in range(1, len(dictionary)):                                                         #<--- skip obj function row in basis
                     if dictionary[eq][i] == 1 and dictionary[eq][pivot_col] < 0:                             #<-correct row and row has neg coeff on entering var
                         ratio = abs(dictionary[eq][0] / dictionary[eq][pivot_col])
-                        if ratio < cur_ratio or cur_ratio == -1 :  #<-tightest bound
+                        if ratio < cur_ratio or cur_ratio == -1 :                                            #<-tightest bound
                             pivot_row = eq
                             cur_ratio = ratio
                             break
@@ -285,17 +278,16 @@ def get_pivot(dictionary, basis, method):
         while j < len(dictionary[0]):
             pivot_col = j
             if dictionary[0][pivot_col] > 0:
-                print(pivot_col, " <-pivot_col")
+
                 #-----get pivot_row for this pivot_col--------#
                 for i in range(1, len(dictionary)):
                     eq = dictionary[i]
                     if eq[pivot_col] < 0:
-                        cur_limiting_val = abs(eq[0] / eq[pivot_col])                     #<--- check restriction imposed by entering var in this eqn
+                        cur_limiting_val = abs(eq[0] / eq[pivot_col])                            #<- check restriction imposed by entering var in this eqn
                         if min_limiting_val == None or cur_limiting_val < min_limiting_val:      #<- it is a bound and (no bound is set or its a min bound)
                             min_limiting_val = cur_limiting_val
-                            pivot_row = i                                                   #<- might be some errors in case of ties!!!!!!!!!!!
-                print(pivot_row, " <-pivot_row")
-                min_limiting_val = None                                                  #<- reset for next col
+                            pivot_row = i                                                        #<- might be some errors in case of ties!!!!!!!!!!!
+                min_limiting_val = None                                                          #<- reset for next col
 
                 if pivot_row == None:
                     print("unbounded")
@@ -303,7 +295,6 @@ def get_pivot(dictionary, basis, method):
 
                 #-----compute increase in obj_function-------#
                 increase = get_obj_increase(dictionary, basis, pivot_col, pivot_row)
-                print(increase, " <-increase\n")
                 if increase > biggest_increase:
                     best_pivot_col = pivot_col
                     best_pivot_row = pivot_row
@@ -313,13 +304,10 @@ def get_pivot(dictionary, basis, method):
         pivot_col = best_pivot_col
         pivot_row = best_pivot_row
 
-        #print("largest increase")
-
     #--------check for unboundedness------#
     if pivot_row == None:
         unbounded = True
         
-    #print("leaving get_pivot\n")
     return pivot_col, pivot_row, unbounded
 
 def get_obj_increase(dictionary, basis, pivot_col, pivot_row):
@@ -335,19 +323,18 @@ def get_obj_increase(dictionary, basis, pivot_col, pivot_row):
 
     #---do pivot in copy_pivot_row (from do_pivot)-----------#
     factor = copy_pivot_row[pivot_col]
-    rescaling_arr = [None] * len(copy_pivot_row)                                          #<- for dividing the numpy array at pivot row by the correct factors
+    rescaling_arr = [None] * len(copy_pivot_row)                             #<- for dividing the numpy array at pivot row by the correct factors
     rescaling_arr = np.array(rescaling_arr)
     
-    for i in range(len(copy_pivot_row)):                 #<- create rescaling_arr with the appropriate factors based on entering var having negative coefficient
-        if basis[i] == 1 and copy_pivot_row[i] == 1:     #<- if we are the old basis var flip sign
+    for i in range(len(copy_pivot_row)):                                     #<- create rescaling_arr with the appropriate factors based on entering var having negative coefficient
+        if basis[i] == 1 and copy_pivot_row[i] == 1:                         #<- if we are the old basis var flip sign
             rescaling_arr[i] = factor
-        elif i == pivot_col:                                    #<- if we are the entering var flip sign (the math messes this up)
+        elif i == pivot_col:                                                 #<- if we are the entering var flip sign (the math messes this up)
             rescaling_arr[i] = factor
         else:
             rescaling_arr[i] = -1*factor
 
     copy_pivot_row = np.divide(copy_pivot_row, rescaling_arr)
-    #print(copy_pivot_row, " <-copy_pivot_row\n")
 
     #----------sub in copy_pivot_row into obj function and calc increase----------#
     col = 0
@@ -356,28 +343,23 @@ def get_obj_increase(dictionary, basis, pivot_col, pivot_row):
         copy_obj_function[col] = copy_obj_function[col] + (copy_pivot_row[col] * constant)
         col += 1
     copy_obj_function[pivot_col] = Fraction(0)
-    #print(copy_obj_function, " <-new obj function\n")
 
     increase = copy_obj_function[0] - old_obj_val 
 
     return(increase)
 
 def do_pivot(dictionary, basis, pivot_col, pivot_row):
-    #------------------------------------------------#
-    # Will make this work with only numpy arrays, aux problems are already arrays
-    #initially feasible probs will have ot be converte to numpy arrays befor calling do_pivot
-    #------------------------------------------------#
 
     #--------pivot in entering val in our tightest constraint---#
     factor = dictionary[pivot_row][pivot_col]
-    rescaling_arr = [None] * len(dictionary[pivot_row])                                          #<- for dividing the numpy array at pivot row by the correct factors
+    rescaling_arr = [None] * len(dictionary[pivot_row])                        #<- for dividing the numpy array at pivot row by the correct factors
     rescaling_arr = np.array(rescaling_arr)
 
-    for i in range(len(dictionary[pivot_row])):                 #<- create rescaling_arr with the appropriate factors based on entering var having negative coefficient
-        if basis[i] == 1 and dictionary[pivot_row][i] == 1:     #<- if we are the old basis var flip sign
+    for i in range(len(dictionary[pivot_row])):                                #<- create rescaling_arr with the appropriate factors based on entering var having negative coefficient
+        if basis[i] == 1 and dictionary[pivot_row][i] == 1:                    #<- if we are the old basis var flip sign
             rescaling_arr[i] = factor
             old_basis_col = i
-        elif i == pivot_col:                                    #<- if we are the entering var flip sign (the math messes this up)
+        elif i == pivot_col:                                                   #<- if we are the entering var flip sign (the math messes this up)
             rescaling_arr[i] = factor
         else:
             rescaling_arr[i] = -1*factor
@@ -385,15 +367,6 @@ def do_pivot(dictionary, basis, pivot_col, pivot_row):
     dictionary[pivot_row] = np.divide(dictionary[pivot_row], rescaling_arr)
 
     #-------update rest of constraints--------------------------------#
-    #row = 0
-    #while row < len(dictionary):
-    #    if row != pivot_row:
-    #        factor = dictionary[pivot_row] * dictionary[row,pivot_col]
-    #        dictionary[row] = dictionary[row] + factor                
-    #        dictionary[row,pivot_col] = Fraction(0)
-    #    row += 1
-
-    #need to copy pivot_row
     row = 0
     while row < len(dictionary):
         if row != pivot_row:
@@ -404,12 +377,6 @@ def do_pivot(dictionary, basis, pivot_col, pivot_row):
                 col += 1
             dictionary[row, pivot_col] = Fraction(0)
         row += 1
-
-    #for eq_i, eq in enumerate(dictionary):
-    #    if eq_i != pivot_row:
-    #        factor = dictionary[pivot_row] * dictionary[eq_i][pivot_col]
-    #        dictionary[eq_i] = dictionary[eq_i] + factor                
-    #        dictionary[eq_i][pivot_col] = Fraction(0) 
 
     #------update basis---------------------------------#
     for i in range(len(basis)):
@@ -424,35 +391,21 @@ def get_obj_val(dictionary):
     return dictionary[0][0]
 
 def solve(dictionary, basis, method):
-    #-watchout for unboundedness
-    #-watch for cycling 
-    #-All dictionaries are a list of "numpy arrays" 
 
     while not_optimal(dictionary):
         prev_obj_val = dictionary[0][0]
         pivot_col, pivot_row, unbounded  = get_pivot(dictionary, basis, method)
 
-        print("in solve")
-        print(method)
-        print(pivot_col, "<-pivot_col")
-        print(pivot_row, "<- pivot_row")
-        #---------TODO-----------#
-        # if unbounded is true need to deal with that probably end function here
         if unbounded == True:
             print("unbounded")
             exit()
-        #------------------------#
-        dictionary, basis = do_pivot(dictionary, basis, pivot_col, pivot_row)
 
-        print("dictionary after pivot")
-        print(dictionary)
-        print()
+        dictionary, basis = do_pivot(dictionary, basis, pivot_col, pivot_row)
 
         new_obj_val = dictionary[0][0]
         if new_obj_val == prev_obj_val:                                 #<---- if obj val remains constant -> degeneracy -> could be cycling, use blands to avoid
             method = "Blands"
         else:
-            #method = "Largest_coeff"
             method = "Largest_increase"
 
     return dictionary, basis
@@ -506,19 +459,18 @@ def get_optimal_point(dictionary, basis):
     return vars
 
 def solve_aux(auxillary, basis):
-    print("in solve_aux")
-     #------solve auxillary problem loop until omega not in basis in degenerate case-----#
+
+    #------solve auxillary problem loop until omega not in basis in degenerate case-----#
     method = "Largest_increase"
     while basis[-1] == 1:                               #<- deal with case where omega in basis and degenerate pivot until optimal and its not
         auxillary, basis = solve(auxillary, basis, method)
 
         if basis[-1] == 1:                              #<- omega in basis and degenerate
-            print("omega in basis\n")                 #<- IF OMEGA NOT DEGENERRATE MIGHT BE INFEASIBLE
             omega_row = None
             pivot_col = None
             method = "Blands"                           #<- to prevent cycling
 
-                #---------find row omega is in to pivot out(pivot_row) if omega degenerate, if not degenerate -> infeasible---------#
+            #---------find row omega is in to pivot out(pivot_row) if omega degenerate, if not degenerate -> infeasible---------#
             for row, eq  in enumerate(auxillary):      
                 if eq[-1] == 1:                         #<- this row is omega row as al others have omega 0 since its basic
                     omega_row = row
@@ -537,7 +489,6 @@ def solve_aux(auxillary, basis):
                     pivot_col = col
                     break
 
-                
             if pivot_col == None:
                 print("auxillary degenerate omega error") 
                 exit()
@@ -545,40 +496,18 @@ def solve_aux(auxillary, basis):
             #-----do pivot-----------#
             auxillary, basis = do_pivot(auxillary, basis, pivot_col, omega_row)
 
-    print("leaving solve aux\n")
     return(auxillary, basis)
 
 def main():
     
     dictionary, basis = make_dictionary()
-
-    #---Test for largest increase---#
-    #pivot_col, pivot_row, unbounded = get_pivot(dictionary, basis, method = "Largest_increase")
-    #print(pivot_col, " <-pivot_col")
-    #print(pivot_row, " <-pivot_row")
-    #print()
-    #exit()
-    #---Test for largest increase---#
-
-    #----------------------------
-    #Check if initital dictionary feasible
-    #solve aux problem if not 
+    
     if not_feasible(dictionary):
         original_obj_function = copy.deepcopy(dictionary[0])
         auxillary, basis = create_aux_problem(dictionary, basis)
 
-        print("auxillary")
-        print(auxillary)
-        print(basis)
-        print()
-
         #------solve auxillary problem-----#
         auxillary, basis = solve_aux(auxillary, basis)
-
-        print("auxillary solved")
-        print(auxillary)
-        print(basis)
-        print()
 
         if get_obj_val(auxillary) != 0:
             print("infeasible")
@@ -598,14 +527,11 @@ def main():
        
 
     #----------If were here dictionary is optimal----------#
-    optimization_vars = get_optimal_point(dictionary, basis)     #<- will be a list
+    optimization_vars = get_optimal_point(dictionary, basis)     
     print("optimal")
     print(float(get_obj_val(dictionary)))
     for val in optimization_vars:
         print(float(val), end = ' ')
-
-
-    print('\nhi')
 
 
 if __name__ == "__main__":

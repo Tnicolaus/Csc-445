@@ -3,6 +3,7 @@ import copy
 from tkinter.ttk import Separator
 import numpy as np
 from fractions import Fraction
+from decimal import Decimal
 
 def main():
  
@@ -52,6 +53,9 @@ def main():
     a = np.append(a,[1])
     #print(a)
 
+    m = 1.23495
+    #m = round(m, 4)
+    print('%.4f' % m)
 
 if __name__ == "__main__":
     main()
