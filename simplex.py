@@ -521,10 +521,8 @@ def main():
             dictionary = reintroduce(auxillary, basis, original_obj_function)
             dictionary, basis = solve(dictionary, basis, method = "Largest_increase")
             
-
     else:
-        dictionary, basis = solve(dictionary, basis, method = "Largest_increase")
-       
+        dictionary, basis = solve(dictionary, basis, method = "Largest_increase") 
 
     #----------If were here dictionary is optimal----------#
     optimization_vars = get_optimal_point(dictionary, basis)     
