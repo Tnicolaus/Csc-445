@@ -160,7 +160,6 @@ def not_feasible(dictionary):
     return False
 
 def create_aux_problem(dictionary, basis):
-    print("in create_aux_problem")
     #------------------------------------#
     # takes an infeasible dictionary and 
     # returns the feasible dictionary after
@@ -216,7 +215,6 @@ def create_aux_problem(dictionary, basis):
 
             auxillary[eq_i][-1] = Fraction(0)                                      #<------ set basic var to 0 in eqn that dont involve it
 
-    print("leaving create_aux\n")
     return auxillary, basis
 
 def not_optimal(dictionary):
@@ -286,9 +284,8 @@ def get_pivot(dictionary, basis, method):
         j = 1
         while j < len(dictionary[0]):
             pivot_col = j
-            #print(pivot_col)
             if dictionary[0][pivot_col] > 0:
-                #print(pivot_col, " <-pivot_col")
+                print(pivot_col, " <-pivot_col")
                 #-----get pivot_row for this pivot_col--------#
                 for i in range(1, len(dictionary)):
                     eq = dictionary[i]
@@ -297,7 +294,8 @@ def get_pivot(dictionary, basis, method):
                         if min_limiting_val == None or cur_limiting_val < min_limiting_val:      #<- it is a bound and (no bound is set or its a min bound)
                             min_limiting_val = cur_limiting_val
                             pivot_row = i                                                   #<- might be some errors in case of ties!!!!!!!!!!!
-                #print(pivot_row, " <-pivot_row")
+                print(pivot_row, " <-pivot_row")
+                min_limiting_val = None                                                  #<- reset for next col
 
                 if pivot_row == None:
                     print("unbounded")
@@ -305,7 +303,7 @@ def get_pivot(dictionary, basis, method):
 
                 #-----compute increase in obj_function-------#
                 increase = get_obj_increase(dictionary, basis, pivot_col, pivot_row)
-                #print(increase, " <-increase")
+                print(increase, " <-increase\n")
                 if increase > biggest_increase:
                     best_pivot_col = pivot_col
                     best_pivot_row = pivot_row
@@ -434,10 +432,10 @@ def solve(dictionary, basis, method):
         prev_obj_val = dictionary[0][0]
         pivot_col, pivot_row, unbounded  = get_pivot(dictionary, basis, method)
 
-        #print("in solve")
-        #print(method)
-        #print(pivot_col)
-        #print(pivot_row)
+        print("in solve")
+        print(method)
+        print(pivot_col, "<-pivot_col")
+        print(pivot_row, "<- pivot_row")
         #---------TODO-----------#
         # if unbounded is true need to deal with that probably end function here
         if unbounded == True:
@@ -446,8 +444,9 @@ def solve(dictionary, basis, method):
         #------------------------#
         dictionary, basis = do_pivot(dictionary, basis, pivot_col, pivot_row)
 
-        #print(dictionary)
-        #print()
+        print("dictionary after pivot")
+        print(dictionary)
+        print()
 
         new_obj_val = dictionary[0][0]
         if new_obj_val == prev_obj_val:                                 #<---- if obj val remains constant -> degeneracy -> could be cycling, use blands to avoid
